@@ -1,0 +1,99 @@
+---
+const publishableKey = import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY;
+---
+
+<html>
+<head>
+    <title>Detailed Sign-Up Test</title>
+    <script 
+        async 
+        crossorigin 
+        data-clerk-publishable-key={publishableKey}
+        src="https://unpkg.com/@clerk/clerk-js@latest/dist/clerk.browser.js"
+        type="text/javascript"
+    ></script>
+</head>
+<body>
+    <h1>Detailed Sign-Up Debug Test</h1>
+    
+    <div id="sign-up-container" style="margin: 2rem 0; min-height: 400px;"></div>
+    
+    <div id="debug-log" style="background: #f8f9fa; padding: 1rem; margin: 1rem 0; border-radius: 4px; max-height: 300px; overflow-y: auto;">
+        <h3>Debug Log:</h3>
+        <div id="log-content">Loading...</div>
+    </div>
+    
+    <script>
+        function addLog(message) {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+        
+        window.addEventListener('load', async () => {
+            addLog('🔄 Page loaded, initializing Clerk...');
+            
+            try {
+                if (window.Clerk) {
+                    addLog('✅ Clerk JavaScript loaded');
+                    
+                    await window.Clerk.load();
+                    addLog('✅ Clerk initialized successfully');
+                    addLog(`📋 Using publishable key: ${window.Clerk.publishableKey || 'undefined'}`);
+                    
+                    // Set up event listeners for sign-up events
+                    window.Clerk.addListener('user', (user) => {
+                        if (user) {
+                            addLog(`🎉 User signed up successfully!`);
+                            addLog(`👤 User ID: ${user.id}`);
+                            addLog(`📧 Email: ${user.emailAddresses[0]?.emailAddress || 'No email'}`);
+                            addLog(`✅ User should now appear in Clerk Dashboard`);
+                        }
+                    });
+                    
+                    window.Clerk.addListener('session', (session) => {
+                        if (session) {
+                            addLog(`🔐 Session created: ${session.id}`);
+                        }
+                    });
+                    
+                    // Mount sign-up component
+                    const signUpDiv = document.getElementById('sign-up-container');
+                    addLog('🚀 Mounting sign-up component...');
+                    
+                    window.Clerk.mountSignUp(signUpDiv, {
+                        afterSignUpUrl: '/',
+                        appearance: {
+                            elements: {
+                                socialButtonsBlockButton: "display: none",
+                                dividerRow: "display: none"
+                            }
+                        }
+                    });
+                    
+                    addLog('✅ Sign-up component mounted');
+                    
+                } else {
+                    addLog('❌ Clerk JavaScript not available');
+                }
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`);
+                console.error('Clerk error:', error);
+            }
+        });
+    </script>
+    
+    <div style="background: #e7f3ff; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Try signing up with a test email (like <code>test123@example.com</code>)</li>
+            <li>Watch the debug log above for success messages</li>
+            <li>If you see "User signed up successfully", check your Clerk Dashboard immediately</li>
+            <li>Look for the User ID shown in the log</li>
+        </ol>
+    </div>
+    
+    <p><a href="/">Back to Home</a> | <a href="/clerk-debug">Clerk Debug</a></p>
+</body>
+</html>

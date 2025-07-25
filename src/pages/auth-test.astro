@@ -1,0 +1,63 @@
+---
+// Debug authentication state
+let authResult = "Unknown";
+let userInfo = null;
+let errorDetails = null;
+
+try {
+  if (Astro.locals.auth) {
+    const { userId, sessionClaims, user } = await Astro.locals.auth();
+    authResult = userId ? "Authenticated" : "Not authenticated";
+    userInfo = {
+      userId,
+      email: user?.emailAddresses?.[0]?.emailAddress,
+      sessionClaims: sessionClaims ? "Present" : "Missing"
+    };
+  } else {
+    authResult = "Auth function missing";
+  }
+} catch (error) {
+  authResult = "Error";
+  errorDetails = {
+    message: error.message,
+    stack: error.stack
+  };
+}
+---
+
+<html>
+<head>
+    <title>Auth Test</title>
+</head>
+<body>
+    <h1>Authentication Debug</h1>
+    <h2>Auth Status: {authResult}</h2>
+    
+    {userInfo && (
+        <div>
+            <h3>User Info:</h3>
+            <ul>
+                <li>User ID: {userInfo.userId}</li>
+                <li>Email: {userInfo.email}</li>
+                <li>Session Claims: {userInfo.sessionClaims}</li>
+            </ul>
+        </div>
+    )}
+    
+    {errorDetails && (
+        <div style="background: #fee; padding: 1rem; border-radius: 4px;">
+            <h3>Error Details:</h3>
+            <p><strong>Message:</strong> {errorDetails.message}</p>
+            <pre style="font-size: 0.8em; overflow: auto;">{errorDetails.stack}</pre>
+        </div>
+    )}
+    
+    <h3>Environment Check:</h3>
+    <ul>
+        <li>Publishable Key: {import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY ? 'Set' : 'Missing'}</li>
+        <li>Secret Key: {import.meta.env.CLERK_SECRET_KEY ? 'Set' : 'Missing'}</li>
+    </ul>
+    
+    <p><a href="/">Back to Home</a> | <a href="/sign-in">Try Sign In</a></p>
+</body>
+</html>

@@ -20,21 +20,21 @@ export default defineConfig({
 				{
 					label: 'Public Wiki',
 					autogenerate: { 
-						directory: '.',
+						directory: 'wiki',
 						collapsed: false
 					},
 				},
 				{
 					label: 'Working Group',
 					autogenerate: { 
-						directory: 'working-group',
+						directory: 'wiki/working-group',
 						collapsed: true
 					},
 				},
 				{
 					label: 'Management',
 					autogenerate: { 
-						directory: 'management',
+						directory: 'wiki/management',
 						collapsed: true
 					},
 				},

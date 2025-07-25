@@ -1,0 +1,78 @@
+---
+// Test page to check Clerk API connectivity
+---
+
+<html>
+<head>
+    <title>Clerk API Test</title>
+</head>
+<body>
+    <h1>Clerk API Connectivity Test</h1>
+    
+    <div id="test-results" style="background: #f5f5f5; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+        <p>Loading test results...</p>
+    </div>
+    
+    <button onclick="runTest()" style="background: #2563eb; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+        Run API Test
+    </button>
+    
+    <div style="background: #fff3cd; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+        <h3>What This Test Does:</h3>
+        <ul>
+            <li>Checks if environment variables are set</li>
+            <li>Tests direct API connection to Clerk</li>
+            <li>Attempts to fetch existing users</li>
+            <li>Shows any API errors</li>
+        </ul>
+    </div>
+    
+    <script>
+        async function runTest() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<p>Running test...</p>';
+            
+            try {
+                const response = await fetch('/api/clerk-test');
+                const results = await response.json();
+                
+                let html = '<h3>Test Results:</h3>';
+                html += `<p><strong>Secret Key:</strong> ${results.hasSecretKey ? '✅ Set' : '❌ Missing'} (${results.secretKeyFormat})</p>`;
+                html += `<p><strong>Publishable Key:</strong> ${results.hasPublishableKey ? '✅ Set' : '❌ Missing'} (${results.publishableKeyFormat})</p>`;
+                
+                if (results.apiTest) {
+                    html += '<h4>API Test:</h4>';
+                    if (results.apiTest.success) {
+                        html += `<p>✅ <strong>API Connection Successful!</strong></p>`;
+                        html += `<p>Status: ${results.apiTest.status}</p>`;
+                        if (results.apiTest.userCount !== undefined) {
+                            html += `<p>Users found: ${results.apiTest.userCount}</p>`;
+                            if (results.apiTest.firstUser) {
+                                html += `<p>First user: ${results.apiTest.firstUser.email} (ID: ${results.apiTest.firstUser.id})</p>`;
+                            }
+                        }
+                    } else {
+                        html += `<p>❌ <strong>API Connection Failed</strong></p>`;
+                        html += `<p>Status: ${results.apiTest.status} ${results.apiTest.statusText}</p>`;
+                        if (results.apiTest.error) {
+                            html += `<p>Error: ${results.apiTest.error}</p>`;
+                        }
+                    }
+                } else {
+                    html += '<p>❌ No API test performed (missing secret key)</p>';
+                }
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<p>❌ <strong>Test Failed:</strong> ${error.message}</p>`;
+            }
+        }
+        
+        // Auto-run test on page load
+        window.addEventListener('load', runTest);
+    </script>
+    
+    <p><a href="/">Back to Home</a></p>
+</body>
+</html>

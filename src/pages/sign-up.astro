@@ -1,5 +1,11 @@
 ---
 import { SignUp } from '@clerk/astro/components';
+
+// Ensure environment variable is available
+const publishableKey = import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY;
+if (!publishableKey) {
+  throw new Error('Missing Clerk Publishable Key');
+}
 ---
 
 <html>
@@ -17,7 +23,18 @@ import { SignUp } from '@clerk/astro/components';
                 routing="path"
                 signInUrl="/sign-in"
                 afterSignUpUrl="/"
+                appearance={{
+                    elements: {
+                        socialButtonsBlockButton: "display: none",
+                        dividerRow: "display: none"
+                    }
+                }}
             />
+            
+            <!-- Debug info (remove in production) -->
+            <div style="margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 4px; font-size: 0.8rem;">
+                <strong>Debug:</strong> Publishable Key: {publishableKey ? 'Set' : 'Missing'}
+            </div>
         </div>
     </div>
 </body>

@@ -15,7 +15,10 @@
       "Bash(npm install:*)",
       "Bash(mv:*)",
       "Bash(cp:*)",
-      "WebFetch(domain:clerk.com)"
+      "WebFetch(domain:clerk.com)",
+      "Bash(pkill:*)",
+      "Bash(true)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }

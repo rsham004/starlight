@@ -1,0 +1,141 @@
+---
+// Auto-running test results page
+---
+
+<html>
+<head>
+    <title>Auto Test Results</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 2rem auto; padding: 2rem; }
+        .test-result { 
+            background: #f8f9fa; 
+            padding: 1rem; 
+            margin: 1rem 0; 
+            border-radius: 4px; 
+            border-left: 4px solid #007bff; 
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        pre { 
+            background: #fff; 
+            padding: 1rem; 
+            border-radius: 4px; 
+            overflow-x: auto; 
+            font-size: 0.9em;
+            border: 1px solid #ddd;
+        }
+        .loading { text-align: center; padding: 2rem; }
+        h3 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Automated TDD User Creation Tests</h1>
+    
+    <div id="loading" class="loading">
+        <h2>🔄 Running all tests automatically...</h2>
+        <p>This will test direct API user creation with different email domains.</p>
+    </div>
+    
+    <div id="results" style="display: none;"></div>
+    
+    <script>
+        async function runAllTests() {
+            try {
+                console.log('Fetching test results...');
+                const response = await fetch('/api/run-all-tests');
+                const results = await response.json();
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+                
+                let html = `<h2>📊 Test Results (${results.timestamp})</h2>`;
+                
+                results.tests.forEach((test, index) => {
+                    const cssClass = test.success ? 'success' : 'error';
+                    const icon = test.success ? '✅' : '❌';
+                    
+                    html += `<div class="test-result ${cssClass}">`;
+                    html += `<h3>${icon} Test ${index + 1}: ${test.test}</h3>`;
+                    
+                    if (test.email) {
+                        html += `<p><strong>Email:</strong> ${test.email}</p>`;
+                    }
+                    
+                    if (test.userCount !== undefined) {
+                        html += `<p><strong>User Count:</strong> ${test.userCount}</p>`;
+                    }
+                    
+                    if (test.userCreated) {
+                        html += `<p><strong>✅ User Created!</strong> ID: ${test.userCreated}</p>`;
+                    }
+                    
+                    if (test.status) {
+                        html += `<p><strong>HTTP Status:</strong> ${test.status} ${test.statusText || ''}</p>`;
+                    }
+                    
+                    if (test.users && test.users.length > 0) {
+                        html += `<p><strong>Existing Users:</strong></p>`;
+                        html += '<ul>';
+                        test.users.forEach(user => {
+                            html += `<li>${user.email} (ID: ${user.id}, Created: ${new Date(user.created).toLocaleString()})</li>`;
+                        });
+                        html += '</ul>';
+                    }
+                    
+                    if (test.newUsers && test.newUsers.length > 0) {
+                        html += `<p><strong>🆕 Newly Created Users:</strong></p>`;
+                        html += '<ul>';
+                        test.newUsers.forEach(user => {
+                            html += `<li>${user.email} (ID: ${user.id}, Created: ${new Date(user.created).toLocaleString()})</li>`;
+                        });
+                        html += '</ul>';
+                    }
+                    
+                    if (test.error) {
+                        html += `<p><strong>❌ Error:</strong></p>`;
+                        html += `<pre>${JSON.stringify(test.error, null, 2)}</pre>`;
+                    }
+                    
+                    html += '</div>';
+                });
+                
+                // Summary
+                const successCount = results.tests.filter(t => t.success).length;
+                const totalTests = results.tests.length;
+                
+                html += `<div class="test-result ${successCount === totalTests ? 'success' : 'error'}">`;
+                html += `<h3>📋 Summary</h3>`;
+                html += `<p><strong>Tests Passed:</strong> ${successCount}/${totalTests}</p>`;
+                
+                const creationTests = results.tests.filter(t => t.email);
+                const successfulCreations = creationTests.filter(t => t.success);
+                
+                if (creationTests.length > 0) {
+                    html += `<p><strong>User Creations:</strong> ${successfulCreations.length}/${creationTests.length} successful</p>`;
+                    
+                    if (successfulCreations.length === 0) {
+                        html += `<p><strong>🔍 Diagnosis:</strong> No users were created via API - there may be account restrictions or configuration issues.</p>`;
+                    } else if (successfulCreations.length < creationTests.length) {
+                        html += `<p><strong>🔍 Diagnosis:</strong> Some domains work, others don't - likely domain restrictions.</p>`;
+                    } else {
+                        html += `<p><strong>🔍 Diagnosis:</strong> All API creation tests passed - the issue is with frontend components.</p>`;
+                    }
+                }
+                
+                html += '</div>';
+                
+                document.getElementById('results').innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('loading').innerHTML = `<h2>❌ Error running tests</h2><p>${error.message}</p>`;
+                console.error('Test error:', error);
+            }
+        }
+        
+        // Auto-run tests when page loads
+        window.addEventListener('load', runAllTests);
+    </script>
+    
+    <p><a href="/">← Back to Home</a></p>
+</body>
+</html>

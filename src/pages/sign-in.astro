@@ -17,6 +17,12 @@ import { SignIn } from '@clerk/astro/components';
                 routing="path"
                 signUpUrl="/sign-up"
                 afterSignInUrl="/"
+                appearance={{
+                    elements: {
+                        socialButtonsBlockButton: "display: none",
+                        dividerRow: "display: none"
+                    }
+                }}
             />
         </div>
     </div>
