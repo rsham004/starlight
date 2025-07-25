@@ -1,0 +1,15 @@
+---
+import type { Props } from '@astrojs/starlight/props';
+import StarlightHead from '@astrojs/starlight/components/Head.astro';
+---
+
+<StarlightHead {...Astro.props}><slot /></StarlightHead>
+
+<style>
+  .auth-floating {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+</style>

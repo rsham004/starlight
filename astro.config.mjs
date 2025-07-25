@@ -1,24 +1,42 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import clerk from '@clerk/astro';
+import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
+	output: 'server',
+	adapter: node({ mode: 'standalone' }),
 	integrations: [
+		clerk(),
 		starlight({
-			title: 'My Docs',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+			title: 'AI Product Development Wiki',
+			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/AI-Product-Development/wiki' }],
+			components: {
+				PageFrame: './src/components/PageFrame.astro',
+			},
 			sidebar: [
 				{
-					label: 'Guides',
-					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
-					],
+					label: 'Public Wiki',
+					autogenerate: { 
+						directory: '.',
+						collapsed: false
+					},
 				},
 				{
-					label: 'Reference',
-					autogenerate: { directory: 'reference' },
+					label: 'Working Group',
+					autogenerate: { 
+						directory: 'working-group',
+						collapsed: true
+					},
+				},
+				{
+					label: 'Management',
+					autogenerate: { 
+						directory: 'management',
+						collapsed: true
+					},
 				},
 			],
 		}),
