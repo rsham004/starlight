@@ -19,6 +19,11 @@ try {
   if (existsSync(CONTENT_DIR)) {
     rmSync(CONTENT_DIR, { recursive: true, force: true });
   }
+  // Ensure src/content directory exists first
+  const contentParentDir = './src/content';
+  if (!existsSync(contentParentDir)) {
+    mkdirSync(contentParentDir, { recursive: true });
+  }
   mkdirSync(CONTENT_DIR, { recursive: true });
   
   // Clone the repository

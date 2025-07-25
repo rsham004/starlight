@@ -28,7 +28,10 @@
       "Bash(gh issue comment:*)",
       "Bash(grep:*)",
       "Bash(sed:*)",
-      "Bash(gh issue close:*)"
+      "Bash(gh issue close:*)",
+      "Bash(winget install:*)",
+      "Bash(gh:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
