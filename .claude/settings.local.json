@@ -18,7 +18,12 @@
       "WebFetch(domain:clerk.com)",
       "Bash(pkill:*)",
       "Bash(true)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(CLERK_SECRET_KEY=\"sk_test_Mk6a8dSlI5hFZrLJOGVKoOBxZYtCX1bLFNl7CCIJVz\" node fix-users.js)",
+      "Bash(CLERK_SECRET_KEY=\"sk_test_Mk6a8dSlI5hFZrLJOGVKoOBxZYtCX1bLFNl7CCIJVz\" node fix-users.mjs)",
+      "Bash(node:*)"
     ],
     "deny": []
   }

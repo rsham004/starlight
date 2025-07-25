@@ -1,0 +1,192 @@
+---
+import type { Props } from '@astrojs/starlight/props';
+import Default from '@astrojs/starlight/components/Sidebar.astro';
+---
+
+<!-- Include the default sidebar first -->
+<Default {...Astro.props} />
+
+<!-- Add our custom dynamic sidebar content -->
+<div id="dynamic-sidebar-overlay">
+  <div class="sidebar-section">
+    <h3>Welcome</h3>
+    <ul>
+      <li><a href="/" class="sidebar-link">Home</a></li>
+      <li><a href="/wiki/" class="sidebar-link">Getting Started</a></li>
+    </ul>
+  </div>
+
+  <!-- Working Group content - hidden by default -->
+  <div id="working-group-section" class="sidebar-section" style="display: none;">
+    <h3>🎯 AI Builders Circle</h3>
+    <ul>
+      <li><a href="/wiki/working-group/ai-builders-circle/" class="sidebar-link">Circle Home</a></li>
+      <li><a href="/wiki/working-group/ai-builders-circle/getting-started/" class="sidebar-link">Getting Started</a></li>
+      <li><a href="/wiki/working-group/ai-builders-circle/core-values/" class="sidebar-link">Core Values</a></li>
+      <li><a href="/wiki/working-group/ai-builders-circle/foundry-os/" class="sidebar-link">Foundry OS</a></li>
+      
+      <li class="sidebar-submenu">
+        <details>
+          <summary>📋 Challenges</summary>
+          <ul>
+            <li><a href="/wiki/working-group/ai-builders-circle/challenges/overview/" class="sidebar-link">Overview</a></li>
+            <li><a href="/wiki/working-group/ai-builders-circle/challenges/Challenges_list/" class="sidebar-link">All Challenges</a></li>
+            <li><a href="/wiki/working-group/ai-builders-circle/challenges/challenge_template/" class="sidebar-link">Template</a></li>
+          </ul>
+        </details>
+      </li>
+
+      <li class="sidebar-submenu">
+        <details>
+          <summary>📅 Events & Meetings</summary>
+          <ul>
+            <li><a href="/wiki/working-group/ai-builders-circle/Events/Events_overview/" class="sidebar-link">Events Overview</a></li>
+            <li><a href="/wiki/working-group/ai-builders-circle/Events/Events_list/" class="sidebar-link">Events List</a></li>
+            <li><a href="/wiki/working-group/ai-builders-circle/meetings/overview/" class="sidebar-link">Meetings</a></li>
+          </ul>
+        </details>
+      </li>
+
+      <li class="sidebar-submenu">
+        <details>
+          <summary>🔬 Exploration</summary>
+          <ul>
+            <li><a href="/wiki/working-group/ai-builders-circle/exploration/RuV/RuV-SynapticMesh-explanation/" class="sidebar-link">RuV SynapticMesh</a></li>
+            <li><a href="/wiki/working-group/ai-builders-circle/exploration/RuV/swarm/Learning_swarming_example/" class="sidebar-link">Swarm Learning</a></li>
+          </ul>
+        </details>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Management content - hidden by default -->
+  <div id="management-section" class="sidebar-section" style="display: none;">
+    <h3>🏢 Management Dashboard</h3>
+    <ul>
+      <li><a href="/wiki/management/" class="sidebar-link">Dashboard</a></li>
+      <li><a href="/wiki/working-group/ai-builders-circle/Circle_Management/management_tasks/" class="sidebar-link">Circle Management</a></li>
+      <li><a href="/wiki/working-group/ai-builders-circle/Circle_Management/member_table/" class="sidebar-link">Member Directory</a></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  // Function to update sidebar based on user role
+  async function updateDynamicSidebar() {
+    try {
+      const response = await fetch('/api/auth/user');
+      if (response.ok) {
+        const userData = await response.json();
+        if (userData.userId) {
+          const userRole = userData.role || 'public';
+          
+          // Show working group content for working_group and management users
+          if (userRole === 'working_group' || userRole === 'management') {
+            const workingGroupSection = document.getElementById('working-group-section');
+            if (workingGroupSection) {
+              workingGroupSection.style.display = 'block';
+            }
+          }
+          
+          // Show management content only for management users
+          if (userRole === 'management') {
+            const managementSection = document.getElementById('management-section');
+            if (managementSection) {
+              managementSection.style.display = 'block';
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.log('Could not fetch user data for dynamic sidebar:', error);
+      // Keep default state (public only)
+    }
+  }
+
+  // Update sidebar when page loads
+  document.addEventListener('DOMContentLoaded', updateDynamicSidebar);
+  
+  // Also update when authentication state changes
+  window.addEventListener('load', updateDynamicSidebar);
+</script>
+
+<style>
+  #dynamic-sidebar-overlay {
+    margin-top: 1rem;
+    border-top: 1px solid var(--sl-color-gray-5);
+    padding-top: 1rem;
+  }
+
+  .sidebar-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .sidebar-section h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--sl-color-text-accent);
+    border-bottom: 1px solid var(--sl-color-gray-5);
+    padding-bottom: 0.25rem;
+  }
+
+  .sidebar-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sidebar-section li {
+    margin-bottom: 0.25rem;
+  }
+
+  .sidebar-link {
+    color: var(--sl-color-gray-2) !important;
+    text-decoration: none;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    display: block;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .sidebar-link:hover {
+    color: var(--sl-color-white) !important;
+    background-color: var(--sl-color-accent);
+  }
+
+  .sidebar-submenu details {
+    margin: 0.25rem 0;
+  }
+
+  .sidebar-submenu summary {
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--sl-color-gray-2);
+    padding: 0.25rem 0.5rem;
+    transition: color 0.2s ease;
+    border-radius: 4px;
+  }
+
+  .sidebar-submenu summary:hover {
+    color: var(--sl-color-white);
+    background-color: var(--sl-color-gray-5);
+  }
+
+  .sidebar-submenu ul {
+    margin-left: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .sidebar-submenu ul .sidebar-link {
+    font-size: 0.8rem;
+    color: var(--sl-color-gray-3) !important;
+  }
+
+  /* Current page highlighting */
+  .sidebar-link[aria-current="page"] {
+    background-color: var(--sl-color-accent);
+    color: var(--sl-color-white) !important;
+    font-weight: 600;
+  }
+</style>

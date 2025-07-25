@@ -1,0 +1,147 @@
+import type { APIRoute } from 'astro';
+
+export const GET: APIRoute = async () => {
+  const secretKey = import.meta.env.CLERK_SECRET_KEY;
+  const orgId = 'org_30MZadhJc6MCmbqQSWUmy54gTJq';
+  
+  if (!secretKey) {
+    return new Response(JSON.stringify({ error: 'Missing secret key' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  const results = {
+    timestamp: new Date().toISOString(),
+    usersToKeep: [] as any[],
+    usersDeleted: [] as any[],
+    errors: [] as any[]
+  };
+
+  // Correct emails from members.json
+  const correctEmails = [
+    'abirathamir@gmail.com',
+    'alex.coaton@gmail.com', 
+    'allison9y@gmail.com',
+    'amirtha05032000@gmail.com',
+    'arorarajat0912@gmail.com',
+    'ashok@askaconsulting.com',
+    'bharathssa16@gmail.com',
+    'cathyofnz@gmail.com',
+    'cgbarlow@gmail.com',
+    'chainat@gmail.com',
+    'clareivers@gmail.com',
+    'd1643146364@gmail.com',
+    'dandyhello@gmail.com',
+    'daniel.pruessner@gmail.com',
+    'dave.braendler@productfoundry.ai',
+    'dilip.ladhani@gmail.com',
+    'easybishal@gmail.com',
+    'evanlee123@utexas.edu',
+    'glenn.ramsey.nz@gmail.com',
+    'gvenkat7@outlook.com',
+    'kylejaycampbell@gmail.com',
+    'mail@dkkim.com',
+    'mark.egan@forgant.com',
+    'martin@return2health.net',
+    'meetup@complexity.com.au',
+    'mick.hobart@gmail.com',
+    'mohd.azeemuddin@gmail.com',
+    'nedhorvath@utexas.edu',
+    'nexus1234@gmail.com',
+    'nigamayush6@gmail.com',
+    'niraj411k@gmail.com',
+    'nirankarjaiswar@gmail.com',
+    'oliviadong2918@gmail.com',
+    'onats.ong@gmail.com',
+    'pappes@gmail.com',
+    'pranavgoyal.work@gmail.com',
+    'praveenchukkala07@gmail.com',
+    'ravi.shamihoke@productfoundry.ai',
+    'schnell18@gmail.com',
+    'shahriarmdgolam@gmail.com',
+    'shahsimoni891@gmail.com',
+    'sharat@intuneai.com.au',
+    'sillva@gmail.com',
+    'susanwangds@gmail.com',
+    'tomo@tomoLennox.com',
+    'varad@neuralhiive.ai',
+    'vignesh.nadarajah@gmail.com',
+    'yakernz@gmail.com'
+  ];
+
+  try {
+    // Get all users
+    const usersResponse = await fetch('https://api.clerk.com/v1/users?limit=100', {
+      headers: {
+        'Authorization': `Bearer ${secretKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const users = await usersResponse.json();
+    
+    for (const user of users) {
+      const email = user.email_addresses?.[0]?.email_address || '';
+      
+      if (correctEmails.includes(email)) {
+        // Keep this user
+        results.usersToKeep.push({
+          id: user.id,
+          email: email,
+          name: `${user.first_name || ''} ${user.last_name || ''}`.trim()
+        });
+      } else {
+        // Delete this user (incorrect email)
+        try {
+          const deleteResponse = await fetch(`https://api.clerk.com/v1/users/${user.id}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${secretKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (deleteResponse.ok) {
+            results.usersDeleted.push({
+              id: user.id,
+              email: email,
+              name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+              reason: 'Incorrect email address'
+            });
+          } else {
+            const errorText = await deleteResponse.text();
+            results.errors.push({
+              id: user.id,
+              email: email,
+              error: errorText
+            });
+          }
+        } catch (error) {
+          results.errors.push({
+            id: user.id,
+            email: email,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
+        }
+      }
+    }
+    
+    results.summary = {
+      totalUsersProcessed: users.length,
+      usersKept: results.usersToKeep.length,
+      usersDeleted: results.usersDeleted.length,
+      errors: results.errors.length
+    };
+
+  } catch (error) {
+    results.errors.push({
+      general: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+
+  return new Response(JSON.stringify(results, null, 2), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
+};
