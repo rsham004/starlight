@@ -23,7 +23,12 @@
       "Bash(ls:*)",
       "Bash(CLERK_SECRET_KEY=\"sk_test_Mk6a8dSlI5hFZrLJOGVKoOBxZYtCX1bLFNl7CCIJVz\" node fix-users.js)",
       "Bash(CLERK_SECRET_KEY=\"sk_test_Mk6a8dSlI5hFZrLJOGVKoOBxZYtCX1bLFNl7CCIJVz\" node fix-users.mjs)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(gh issue create:*)",
+      "Bash(gh issue comment:*)",
+      "Bash(grep:*)",
+      "Bash(sed:*)",
+      "Bash(gh issue close:*)"
     ],
     "deny": []
   }

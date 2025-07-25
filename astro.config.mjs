@@ -19,61 +19,19 @@ export default defineConfig({
 			},
 			sidebar: [
 				{
-					label: 'Welcome',
-					items: [
-						{ label: 'Getting Started', link: '/wiki/' },
-						{ label: 'How to Contribute', link: '/wiki/contributing/' },
-					],
-				},
-				{
-					label: 'Public Resources',
+					label: 'Challenges (Public)',
 					autogenerate: { 
-						directory: 'wiki',
+						directory: 'challenges',
 						collapsed: false
 					},
 				},
 				{
-					label: 'AI Builders Circle',
-					items: [
-						{ label: 'Circle Home', link: '/wiki/working-group/ai-builders-circle/' },
-						{ label: 'Getting Started', link: '/wiki/working-group/ai-builders-circle/getting-started/' },
-						{ label: 'Core Values', link: '/wiki/working-group/ai-builders-circle/core-values/' },
-						{ label: 'Foundry OS', link: '/wiki/working-group/ai-builders-circle/foundry-os/' },
-						{
-							label: 'Challenges',
-							collapsed: true,
-							items: [
-								{ label: 'Overview', link: '/wiki/working-group/ai-builders-circle/challenges/overview/' },
-								{ label: 'All Challenges', link: '/wiki/working-group/ai-builders-circle/challenges/Challenges_list/' },
-								{ label: 'Challenge Template', link: '/wiki/working-group/ai-builders-circle/challenges/challenge_template/' },
-							]
-						},
-						{
-							label: 'Events & Meetings',
-							collapsed: true,
-							items: [
-								{ label: 'Events Overview', link: '/wiki/working-group/ai-builders-circle/Events/Events_overview/' },
-								{ label: 'Events List', link: '/wiki/working-group/ai-builders-circle/Events/Events_list/' },
-								{ label: 'Meetings', link: '/wiki/working-group/ai-builders-circle/meetings/overview/' },
-							]
-						},
-						{
-							label: 'Exploration',
-							collapsed: true,
-							items: [
-								{ label: 'RuV SynapticMesh', link: '/wiki/working-group/ai-builders-circle/exploration/RuV/RuV-SynapticMesh-explanation/' },
-								{ label: 'Swarm Learning', link: '/wiki/working-group/ai-builders-circle/exploration/RuV/swarm/Learning_swarming_example/' },
-							]
-						},
-					],
-				},
-				{
-					label: 'Management Dashboard',
-					items: [
-						{ label: 'Dashboard', link: '/wiki/management/' },
-						{ label: 'Circle Management', link: '/wiki/working-group/ai-builders-circle/Circle_Management/management_tasks/' },
-						{ label: 'Member Directory', link: '/wiki/working-group/ai-builders-circle/Circle_Management/member_table/' },
-					],
+					label: 'Circle Management',
+					badge: 'Management Only',
+					autogenerate: { 
+						directory: 'Circle_Management',
+						collapsed: true
+					},
 				},
 			],
 		}),

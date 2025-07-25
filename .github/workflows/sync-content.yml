@@ -1,0 +1,54 @@
+name: Sync Wiki Content
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [wiki-updated]
+
+jobs:
+  sync-content:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Sync content from wiki
+        run: node sync-content.mjs
+        
+      - name: Fix frontmatter issues
+        run: node scripts/fix-frontmatter.js
+        
+      - name: Check for changes
+        id: changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Commit and push changes
+        if: steps.changes.outputs.changes == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add src/content/docs/
+          git commit -m "🔄 Auto-sync wiki content
+
+          🤖 Generated with GitHub Actions
+          
+          Co-Authored-By: GitHub Action <action@github.com>"
+          git push

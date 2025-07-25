@@ -22,3 +22,19 @@ pnpm-debug.log*
 
 # temporary wiki clone
 .wiki-temp/
+.wiki-sync/
+.git-content-cache/
+
+# synced content (comes from external repo)
+src/content/docs/
+
+# build outputs
+dist/
+.astro/
+
+# VS Code
+.vscode/
+
+# OS files
+Thumbs.db
+.DS_Store
