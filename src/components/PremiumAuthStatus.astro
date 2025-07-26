@@ -1,0 +1,635 @@
+---
+// Premium Authentication Status Component
+---
+
+<div id="premium-auth-status" class="premium-auth-container">
+  <!-- Signed Out State -->
+  <div id="signed-out" class="auth-section">
+    <div class="auth-buttons">
+      <a href="/sign-in" class="btn btn-primary auth-btn">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+        </svg>
+        Sign In
+      </a>
+      <a href="/sign-up" class="btn btn-success auth-btn">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+        </svg>
+        Join Us
+      </a>
+    </div>
+  </div>
+  
+  <!-- Signed In State -->
+  <div id="signed-in" class="auth-section" style="display: none;">
+    <div class="user-profile card-premium">
+      <div class="profile-avatar">
+        <div class="avatar-placeholder">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+          </svg>
+        </div>
+      </div>
+      
+      <div class="profile-info">
+        <div class="user-welcome" id="user-welcome">Welcome!</div>
+        <div class="user-role-container">
+          <div class="role-badges-container" id="user-role">
+            <span class="badge badge-secondary">
+              <svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+              </svg>
+              Community Member
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-actions">
+        <button id="signout-btn" class="btn btn-ghost btn-sm" title="Sign Out">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+            <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  class PremiumAuthManager {
+    constructor() {
+      this.signedOutEl = document.getElementById('signed-out');
+      this.signedInEl = document.getElementById('signed-in');
+      this.welcomeEl = document.getElementById('user-welcome');
+      this.roleEl = document.getElementById('user-role');
+      this.signoutBtn = document.getElementById('signout-btn');
+      
+      this.init();
+    }
+    
+    async init() {
+      this.setupEventListeners();
+      await this.checkAuthStatus();
+    }
+    
+    setupEventListeners() {
+      this.signoutBtn?.addEventListener('click', this.handleSignOut.bind(this));
+    }
+    
+    async checkAuthStatus() {
+      // Add loading state
+      this.showLoadingState();
+      
+      try {
+        const response = await fetch('/api/auth/user');
+        if (response.ok) {
+          const userData = await response.json();
+          if (userData.userId) {
+            // Small delay for smooth transition
+            setTimeout(() => this.showSignedInState(userData), 300);
+          } else {
+            setTimeout(() => this.showSignedOutState(), 300);
+          }
+        } else {
+          setTimeout(() => this.showSignedOutState(), 300);
+        }
+      } catch (error) {
+        console.log('Auth check failed, showing signed out state', error);
+        setTimeout(() => this.showSignedOutState(), 300);
+      }
+    }
+    
+    showLoadingState() {
+      this.signedOutEl.style.display = 'none';
+      this.signedInEl.style.display = 'none';
+      
+      // Create and show loading indicator
+      if (!document.getElementById('auth-loading')) {
+        const loading = document.createElement('div');
+        loading.id = 'auth-loading';
+        loading.className = 'auth-loading';
+        loading.innerHTML = `
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Loading...</div>
+        `;
+        this.signedOutEl.parentNode.appendChild(loading);
+      }
+    }
+    
+    showSignedInState(userData) {
+      // Clean up loading state
+      const loading = document.getElementById('auth-loading');
+      if (loading) loading.remove();
+      
+      this.signedOutEl.style.display = 'none';
+      this.signedInEl.style.display = 'block';
+      
+      // Update welcome message with better formatting
+      let displayName = '';
+      
+      // Prefer first/last name if available
+      if (userData.firstName) {
+        displayName = userData.firstName;
+        if (userData.lastName) {
+          displayName += ` ${userData.lastName}`;
+        }
+      } else if (userData.email) {
+        // Fallback to email username formatting
+        const username = userData.email.split('@')[0];
+        displayName = username
+          .split(/[._-]/)
+          .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(' ');
+      }
+      
+      if (displayName) {
+        this.welcomeEl.textContent = `Welcome, ${displayName}!`;
+      } else {
+        this.welcomeEl.textContent = 'Welcome!';
+      }
+      
+      // Update role badges
+      if (userData.roles && userData.roles.length > 0) {
+        this.updateRoleBadges(userData.roles);
+      } else if (userData.role) {
+        this.updateRoleBadges([userData.role]);
+      } else {
+        this.updateRoleBadges(['public']);
+      }
+      
+      // Add entrance animation with enhanced effect
+      this.signedInEl.classList.remove('animate-fade-in-up');
+      setTimeout(() => this.signedInEl.classList.add('animate-fade-in-up'), 10);
+      
+      // Add subtle glow effect based on highest priority role
+      const roleClasses = {
+        'admin': 'user-glow-admin',
+        'management': 'user-glow-admin',
+        'working_group': 'user-glow-member',
+        'working-group': 'user-glow-member',
+        'content_creators': 'user-glow-member',
+        'content-creators': 'user-glow-member',
+        'public': 'user-glow-public'
+      };
+      
+      const userRoles = userData.roles || [userData.role || 'public'];
+      let glowClass = 'user-glow-public';
+      
+      // Determine glow based on highest priority role
+      if (userRoles.includes('admin') || userRoles.includes('management')) {
+        glowClass = 'user-glow-admin';
+      } else if (userRoles.includes('working_group') || userRoles.includes('working-group') || 
+                 userRoles.includes('content_creators') || userRoles.includes('content-creators')) {
+        glowClass = 'user-glow-member';
+      }
+      
+      this.signedInEl.classList.add(glowClass);
+    }
+    
+    showSignedOutState() {
+      // Clean up loading state
+      const loading = document.getElementById('auth-loading');
+      if (loading) loading.remove();
+      
+      this.signedInEl.style.display = 'none';
+      this.signedOutEl.style.display = 'block';
+      
+      // Add entrance animation
+      this.signedOutEl.classList.remove('animate-fade-in-up');
+      setTimeout(() => this.signedOutEl.classList.add('animate-fade-in-up'), 10);
+    }
+    
+    updateRoleBadges(roles) {
+      const roleConfig = {
+        'management': {
+          label: 'Management',
+          class: 'badge-primary',
+          icon: `<svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                </svg>`
+        },
+        'admin': {
+          label: 'Admin',
+          class: 'badge-primary',
+          icon: `<svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 9.05a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
+                  <path d="M1 1a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h.5a.5.5 0 0 0 .5-.5.5.5 0 0 1 1 0 .5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5.5.5 0 0 1 1 0 .5.5 0 0 0 .5.5h.5a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H6.707L6 1.293A1 1 0 0 0 5.293 1H1Z"/>
+                </svg>`
+        },
+        'working_group': {
+          label: 'AI Builders Circle',
+          class: 'badge-success',
+          icon: `<svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                  <path d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/>
+                  <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                </svg>`
+        },
+        'working-group': {
+          label: 'AI Builders Circle',
+          class: 'badge-success',
+          icon: `<svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                  <path d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/>
+                  <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                </svg>`
+        },
+        'content_creators': {
+          label: 'Content Creators Circle',
+          class: 'badge-warning',
+          icon: `<svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383-4.708 2.825L15 11.105V5.383zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741zM1 11.105l4.708-2.897L1 5.383v5.722z"/>
+                </svg>`
+        },
+        'content-creators': {
+          label: 'Content Creators Circle',
+          class: 'badge-warning',
+          icon: `<svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383-4.708 2.825L15 11.105V5.383zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741zM1 11.105l4.708-2.897L1 5.383v5.722z"/>
+                </svg>`
+        },
+        'public': {
+          label: 'Community Member',
+          class: 'badge-secondary',
+          icon: `<svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                </svg>`
+        }
+      };
+      
+      // Filter out public if there are other roles
+      const filteredRoles = roles.includes('public') && roles.length > 1 
+        ? roles.filter(role => role !== 'public') 
+        : roles;
+      
+      // Clear and populate role container
+      this.roleEl.innerHTML = '';
+      this.roleEl.className = 'role-badges-container';
+      
+      filteredRoles.forEach((role, index) => {
+        const config = roleConfig[role] || roleConfig.public;
+        const badge = document.createElement('span');
+        badge.className = `badge ${config.class}`;
+        badge.innerHTML = `${config.icon} ${config.label}`;
+        badge.style.animationDelay = `${index * 0.1}s`;
+        this.roleEl.appendChild(badge);
+      });
+    }
+    
+    async handleSignOut() {
+      try {
+        // Add loading state
+        this.signoutBtn.disabled = true;
+        this.signoutBtn.innerHTML = '<div class="animate-pulse">...</div>';
+        
+        // Attempt sign out
+        if (window.Clerk) {
+          await window.Clerk.signOut();
+        } else {
+          await fetch('/api/auth/signout', { method: 'POST' });
+        }
+        
+        // Update UI immediately
+        this.showSignedOutState();
+        
+        // Reload to ensure clean state
+        setTimeout(() => window.location.reload(), 500);
+        
+      } catch (error) {
+        console.error('Sign out failed:', error);
+        // Force reload as fallback
+        window.location.reload();
+      }
+    }
+  }
+  
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    new PremiumAuthManager();
+  });
+</script>
+
+<style>
+  .premium-auth-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    font-family: var(--premium-font-family);
+  }
+  
+  .auth-section {
+    min-width: 200px;
+  }
+  
+  .auth-buttons {
+    display: flex;
+    gap: var(--premium-space-sm);
+    flex-wrap: wrap;
+  }
+  
+  .auth-btn {
+    flex: 1;
+    min-width: 90px;
+    font-size: 0.8rem;
+    padding: var(--premium-space-sm);
+  }
+  
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+    padding: var(--premium-space-sm) var(--premium-space-md);
+    min-width: 280px;
+    transition: all var(--premium-transition-normal);
+  }
+  
+  .user-profile:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--premium-shadow-lg);
+  }
+  
+  .profile-avatar {
+    flex-shrink: 0;
+  }
+  
+  .avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    background: var(--premium-gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: var(--premium-shadow-sm);
+  }
+  
+  .profile-info {
+    flex-grow: 1;
+    min-width: 0;
+  }
+  
+  .user-welcome {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--premium-gray-800);
+    margin-bottom: var(--premium-space-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .user-role-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .role-badges-container {
+    display: flex;
+    gap: var(--premium-space-xs);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  
+  .profile-actions {
+    flex-shrink: 0;
+  }
+  
+  .btn-sm {
+    padding: var(--premium-space-xs) var(--premium-space-sm);
+    font-size: 0.75rem;
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .premium-auth-container {
+      top: 0.5rem;
+      right: 0.5rem;
+    }
+    
+    .user-profile {
+      min-width: 240px;
+      padding: var(--premium-space-xs) var(--premium-space-sm);
+    }
+    
+    .auth-btn {
+      font-size: 0.75rem;
+      padding: var(--premium-space-xs) var(--premium-space-sm);
+    }
+    
+    .user-welcome {
+      font-size: 0.8rem;
+    }
+  }
+  
+  /* Dark mode */
+  [data-theme="dark"] .user-welcome {
+    color: var(--premium-gray-100);
+  }
+  
+  [data-theme="dark"] .avatar-placeholder {
+    background: var(--premium-gradient-primary);
+  }
+  
+  /* Role-based glow effects */
+  .user-glow-admin {
+    box-shadow: 0 0 20px rgba(0, 102, 255, 0.2), var(--premium-shadow-lg);
+  }
+  
+  .user-glow-member {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2), var(--premium-shadow-lg);
+  }
+  
+  .user-glow-public {
+    box-shadow: var(--premium-shadow-lg);
+  }
+  
+  /* Enhanced badge styling */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--premium-space-xs);
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    animation: badgePulse 3s ease-in-out infinite;
+    font-size: 0.75rem;
+    padding: var(--premium-space-xs) var(--premium-space-sm);
+    border-radius: var(--premium-radius-sm);
+    border: 1px solid transparent;
+  }
+  
+  .badge svg {
+    flex-shrink: 0;
+  }
+  
+  /* Badge color variations */
+  .badge-primary {
+    background: var(--premium-gradient-primary);
+    color: white;
+    border-color: rgba(0, 102, 255, 0.3);
+  }
+  
+  .badge-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+  
+  .badge-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border-color: rgba(245, 158, 11, 0.3);
+  }
+  
+  .badge-secondary {
+    background: var(--premium-glass);
+    color: var(--premium-gray-700);
+    border-color: var(--premium-glass-border);
+  }
+  
+  @keyframes badgePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+  
+  /* Profile avatar enhancements */
+  .avatar-placeholder {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .avatar-placeholder::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  }
+  
+  /* Animation enhancements */
+  .auth-section {
+    transform: translateY(0);
+    transition: all var(--premium-transition-normal);
+  }
+  
+  .profile-actions button {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .profile-actions button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all var(--premium-transition-normal);
+  }
+  
+  .profile-actions button:hover::before {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .profile-actions button:hover {
+    transform: scale(1.05);
+  }
+  
+  .profile-actions button:active {
+    transform: scale(0.95);
+  }
+  
+  /* User profile hover enhancements */
+  .user-profile {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .user-profile::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: all var(--premium-transition-slow);
+  }
+  
+  .user-profile:hover::before {
+    left: 100%;
+  }
+  
+  /* Loading state */
+  .auth-loading {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+    padding: var(--premium-space-sm) var(--premium-space-md);
+    background: var(--premium-glass);
+    border-radius: var(--premium-radius-lg);
+    border: 1px solid var(--premium-glass-border);
+    backdrop-filter: blur(20px);
+    animation: loadingPulse 1.5s ease-in-out infinite;
+  }
+  
+  .loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--premium-gray-300);
+    border-top: 2px solid var(--premium-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  .loading-text {
+    font-size: 0.875rem;
+    color: var(--premium-gray-600);
+    font-weight: 500;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  @keyframes loadingPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+  
+  /* Enhanced badge pulse animation */
+  .badge {
+    animation: badgePulse 4s ease-in-out infinite;
+  }
+  
+  .badge:hover {
+    animation: badgeHover 0.3s ease-out;
+  }
+  
+  @keyframes badgeHover {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+</style>
