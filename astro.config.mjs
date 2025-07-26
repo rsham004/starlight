@@ -1,15 +1,10 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import clerk from '@clerk/astro';
-import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
-	output: 'server',
-	adapter: node({ mode: 'standalone' }),
 	integrations: [
-		clerk(),
 		starlight({
 			title: 'AI Product Development Wiki',
 			description: 'A premium AI development community platform with role-based access control',
@@ -27,10 +22,6 @@ export default defineConfig({
 			customCss: [
 				'./src/styles/global.css',
 			],
-			components: {
-				PageFrame: './src/components/PageFrame.astro',
-				Sidebar: './src/components/Sidebar.astro',
-			},
 			sidebar: [
 				{
 					label: 'Getting Started',
