@@ -1,0 +1,745 @@
+---
+import type { Props } from '@astrojs/starlight/props';
+import Default from '@astrojs/starlight/components/Sidebar.astro';
+import SmartNavigation from './SmartNavigation.astro';
+---
+
+<!-- Include the default sidebar first for core functionality -->
+<Default {...Astro.props} />
+
+<!-- Premium Dynamic Sidebar Enhancement -->
+<div id="premium-sidebar-overlay" class="premium-sidebar">
+  <div class="sidebar-header">
+    <div class="logo-section">
+      <div class="logo-icon">
+        <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M5.5 2A1.5 1.5 0 0 0 4 3.5v9a1.5 1.5 0 0 0 1.5 1.5h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 13.5 2h-8zM5 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9z"/>
+          <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V6.5a.5.5 0 0 0-1 0v3.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="logo-title">AI Wiki</div>
+        <div class="logo-subtitle">Product Development</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-content">
+    <!-- Always visible public section -->
+    <div class="sidebar-section">
+      <div class="section-header">
+        <h3 class="section-title">
+          <svg width="16" height="16" fill="currentColor">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+          </svg>
+          Getting Started
+        </h3>
+      </div>
+      <ul class="nav-list">
+        <li><a href="/" class="nav-link premium-focus">Home</a></li>
+        <li><a href="/getting-started" class="nav-link premium-focus">Quick Start</a></li>
+        <li><a href="/contributing" class="nav-link premium-focus">Contributing</a></li>
+      </ul>
+    </div>
+
+    <!-- Challenges section - public access -->
+    <div class="sidebar-section">
+      <div class="section-header">
+        <h3 class="section-title">
+          <svg width="16" height="16" fill="currentColor">
+            <path d="M6 2a.5.5 0 0 1 .47.33L10 12H4.5a.5.5 0 0 1-.48-.64L6.04 2.01A.5.5 0 0 1 6 2zm-2.57 8.5h5.114L6.045 3.999 3.43 10.5zM13.5 12H11l-1.5-4h2l1.5 4z"/>
+          </svg>
+          Challenges
+          <span class="section-badge badge badge-secondary">Public</span>
+        </h3>
+      </div>
+      <ul class="nav-list">
+        <li><a href="/challenges/overview" class="nav-link premium-focus">Overview</a></li>
+        <li><a href="/challenges/Challenges_list" class="nav-link premium-focus">All Challenges</a></li>
+        <li><a href="/challenges/challenge_template" class="nav-link premium-focus">Template</a></li>
+      </ul>
+    </div>
+
+    <!-- Working Group section - hidden by default -->
+    <div id="working-group-section" class="sidebar-section" style="display: none;">
+      <div class="section-header">
+        <h3 class="section-title">
+          <svg width="16" height="16" fill="currentColor">
+            <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+            <path d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/>
+            <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+          </svg>
+          AI Builders Circle
+          <span class="section-badge badge badge-success">Working Group</span>
+        </h3>
+      </div>
+      
+      <div class="expandable-menu">
+        <details class="menu-details">
+          <summary class="menu-summary premium-focus">
+            <svg width="14" height="14" fill="currentColor" class="chevron">
+              <path d="M6 12.796V3.204L11.481 8 6 12.796zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753z"/>
+            </svg>
+            Challenges & Projects
+          </summary>
+          <ul class="submenu-list">
+            <li><a href="/challenges/001_Learning_Article_Generation" class="nav-link nav-link-sub premium-focus">Learning Articles</a></li>
+            <li><a href="/challenges/002_Wiki_GitHub_Integration" class="nav-link nav-link-sub premium-focus">Wiki Integration</a></li>
+            <li><a href="/challenges/007_Plugin_Development_Cursor_MCP" class="nav-link nav-link-sub premium-focus">Plugin Development</a></li>
+          </ul>
+        </details>
+        
+        <details class="menu-details">
+          <summary class="menu-summary premium-focus">
+            <svg width="14" height="14" fill="currentColor" class="chevron">
+              <path d="M6 12.796V3.204L11.481 8 6 12.796zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753z"/>
+            </svg>
+            Events & Meetings
+          </summary>
+          <ul class="submenu-list">
+            <li><a href="/Events/Events_overview" class="nav-link nav-link-sub premium-focus">Events Overview</a></li>
+            <li><a href="/Events/Events_list" class="nav-link nav-link-sub premium-focus">Event Schedule</a></li>
+            <li><a href="/meetings/overview" class="nav-link nav-link-sub premium-focus">Meetings</a></li>
+          </ul>
+        </details>
+
+        <details class="menu-details">
+          <summary class="menu-summary premium-focus">
+            <svg width="14" height="14" fill="currentColor" class="chevron">
+              <path d="M6 12.796V3.204L11.481 8 6 12.796zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753z"/>
+            </svg>
+            Research & Exploration
+          </summary>
+          <ul class="submenu-list">
+            <li><a href="/exploration/RuV/RuV-SynapticMesh-explanation" class="nav-link nav-link-sub premium-focus">SynapticMesh</a></li>
+            <li><a href="/exploration/RuV/swarm/Learning_swarming_example" class="nav-link nav-link-sub premium-focus">Swarm Learning</a></li>
+          </ul>
+        </details>
+      </div>
+    </div>
+
+    <!-- Management section - hidden by default -->
+    <div id="management-section" class="sidebar-section" style="display: none;">
+      <div class="section-header">
+        <h3 class="section-title">
+          <svg width="16" height="16" fill="currentColor">
+            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+          </svg>
+          Management Hub
+          <span class="section-badge badge badge-primary">Admin</span>
+        </h3>
+      </div>
+      <ul class="nav-list">
+        <li><a href="/Circle_Management/management_tasks" class="nav-link premium-focus">Tasks & Planning</a></li>
+        <li><a href="/Circle_Management/member_table" class="nav-link premium-focus">Member Directory</a></li>
+      </ul>
+    </div>
+    
+    <!-- Smart Navigation Section -->
+    <SmartNavigation />
+  </div>
+</div>
+
+<script>
+  class PremiumSidebarManager {
+    constructor() {
+      this.workingGroupSection = document.getElementById('working-group-section');
+      this.managementSection = document.getElementById('management-section');
+      this.init();
+    }
+    
+    async init() {
+      await this.updateSidebarForUser();
+      this.setupInteractions();
+    }
+    
+    async updateSidebarForUser() {
+      try {
+        const response = await fetch('/api/auth/user');
+        if (response.ok) {
+          const userData = await response.json();
+          if (userData.userId) {
+            const userRole = userData.role || 'public';
+            this.showSectionsForRole(userRole);
+          }
+        }
+      } catch (error) {
+        console.log('Could not fetch user data for sidebar:', error);
+        // Keep default state (public only)
+      }
+    }
+    
+    showSectionsForRole(role) {
+      // Show working group content for working_group and management users
+      if (role === 'working_group' || role === 'management') {
+        if (this.workingGroupSection) {
+          this.workingGroupSection.style.display = 'block';
+          this.workingGroupSection.classList.add('animate-fade-in-up');
+        }
+      }
+      
+      // Show management content only for management users
+      if (role === 'management') {
+        if (this.managementSection) {
+          this.managementSection.style.display = 'block';
+          this.managementSection.classList.add('animate-fade-in-up');
+        }
+      }
+    }
+    
+    setupInteractions() {
+      // Enhanced details/summary interaction
+      const summaries = document.querySelectorAll('.menu-summary');
+      summaries.forEach(summary => {
+        summary.addEventListener('click', (e) => {
+          const details = summary.parentElement;
+          const chevron = summary.querySelector('.chevron');
+          
+          // Add ripple effect
+          this.addRippleEffect(e, summary);
+          
+          // Add rotation animation
+          setTimeout(() => {
+            if (details.open) {
+              chevron.style.transform = 'rotate(90deg)';
+            } else {
+              chevron.style.transform = 'rotate(0deg)';
+            }
+          }, 10);
+        });
+      });
+      
+      // Add ripple effects to nav links
+      const navLinks = document.querySelectorAll('.nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          this.addRippleEffect(e, link);
+        });
+      });
+      
+      // Highlight current page
+      this.highlightCurrentPage();
+    }
+    
+    addRippleEffect(event, element) {
+      const ripple = document.createElement('span');
+      const rect = element.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = event.clientX - rect.left - size / 2;
+      const y = event.clientY - rect.top - size / 2;
+      
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      ripple.classList.add('ripple-effect');
+      
+      element.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    }
+    
+    highlightCurrentPage() {
+      const currentPath = window.location.pathname;
+      const links = document.querySelectorAll('.nav-link');
+      
+      links.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('nav-link-active');
+        }
+      });
+    }
+  }
+  
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    new PremiumSidebarManager();
+  });
+  
+  // Also initialize on auth state changes
+  window.addEventListener('load', () => {
+    new PremiumSidebarManager();
+  });
+</script>
+
+<style>
+  .premium-sidebar {
+    margin-top: var(--premium-space-md);
+    padding-top: var(--premium-space-md);
+    border-top: 1px solid var(--premium-glass-border);
+  }
+  
+  .sidebar-header {
+    padding: 0 var(--premium-space-md) var(--premium-space-lg);
+    border-bottom: 1px solid var(--premium-glass-border);
+    margin-bottom: var(--premium-space-lg);
+  }
+  
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+    transition: all var(--premium-transition-normal);
+    cursor: pointer;
+  }
+  
+  .logo-section:hover {
+    transform: scale(1.02);
+  }
+  
+  .logo-section:hover .logo-icon {
+    transform: rotate(5deg);
+    box-shadow: var(--premium-shadow-md);
+  }
+  
+  .logo-section:hover .logo-title {
+    background: var(--premium-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--premium-gradient-primary);
+    border-radius: var(--premium-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: var(--premium-shadow-sm);
+    transition: all var(--premium-transition-normal);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .logo-icon::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: logoShine 3s ease-in-out infinite;
+  }
+  
+  @keyframes logoShine {
+    0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    50% { transform: translateX(50%) translateY(50%) rotate(45deg); }
+  }
+  
+  .logo-text {
+    flex: 1;
+  }
+  
+  .logo-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--premium-gray-900);
+    line-height: 1.2;
+  }
+  
+  .logo-subtitle {
+    font-size: 0.75rem;
+    color: var(--premium-gray-500);
+    line-height: 1.2;
+  }
+  
+  .sidebar-content {
+    padding: 0 var(--premium-space-sm);
+  }
+  
+  .sidebar-section {
+    margin-bottom: var(--premium-space-xl);
+  }
+  
+  .section-header {
+    margin-bottom: var(--premium-space-md);
+  }
+  
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--premium-gray-700);
+    margin: 0;
+    padding: var(--premium-space-sm) var(--premium-space-md);
+    background: var(--premium-glass);
+    border-radius: var(--premium-radius-md);
+    border: 1px solid var(--premium-glass-border);
+    position: relative;
+    overflow: hidden;
+    transition: all var(--premium-transition-normal);
+  }
+  
+  .section-title::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 102, 255, 0.1), transparent);
+    transition: all var(--premium-transition-slow);
+  }
+  
+  .section-title:hover::before {
+    left: 100%;
+  }
+  
+  .section-title:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--premium-shadow-sm);
+  }
+  
+  .section-badge {
+    margin-left: auto;
+    font-size: 0.625rem;
+  }
+  
+  .nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--premium-space-xs);
+  }
+  
+  .nav-link {
+    display: flex;
+    align-items: center;
+    padding: var(--premium-space-sm) var(--premium-space-md);
+    color: var(--premium-gray-600);
+    text-decoration: none;
+    font-size: 0.875rem;
+    border-radius: var(--premium-radius-md);
+    transition: all var(--premium-transition-normal);
+    position: relative;
+  }
+  
+  .nav-link:hover {
+    background: var(--premium-glass);
+    color: var(--premium-primary);
+    transform: translateX(6px);
+    box-shadow: var(--premium-shadow-sm);
+  }
+  
+  .nav-link:hover::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--premium-gradient-primary);
+    border-radius: 0 var(--premium-radius-sm) var(--premium-radius-sm) 0;
+  }
+  
+  .nav-link-active {
+    background: var(--premium-gradient-primary);
+    color: white;
+    font-weight: 500;
+    box-shadow: var(--premium-shadow-md);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .nav-link-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 0 var(--premium-radius-sm) var(--premium-radius-sm) 0;
+  }
+  
+  .nav-link-active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: activeShimmer 2s ease-in-out infinite;
+  }
+  
+  @keyframes activeShimmer {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+  }
+  
+  .nav-link-active:hover {
+    background: var(--premium-primary-dark);
+    transform: translateX(3px);
+    box-shadow: var(--premium-shadow-lg);
+  }
+  
+  .nav-link-sub {
+    font-size: 0.8rem;
+    padding: var(--premium-space-xs) var(--premium-space-md);
+    color: var(--premium-gray-500);
+    margin-left: var(--premium-space-md);
+  }
+  
+  .nav-link-sub::before {
+    content: '→';
+    margin-right: var(--premium-space-sm);
+    opacity: 0.5;
+  }
+  
+  .expandable-menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--premium-space-sm);
+  }
+  
+  .menu-details {
+    border: 1px solid var(--premium-glass-border);
+    border-radius: var(--premium-radius-md);
+    overflow: hidden;
+    background: var(--premium-glass);
+  }
+  
+  .menu-summary {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+    padding: var(--premium-space-sm) var(--premium-space-md);
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--premium-gray-700);
+    transition: all var(--premium-transition-normal);
+    list-style: none;
+  }
+  
+  .menu-summary:hover {
+    background: var(--premium-gray-100);
+    color: var(--premium-primary);
+  }
+  
+  .menu-summary::-webkit-details-marker {
+    display: none;
+  }
+  
+  .chevron {
+    transition: transform var(--premium-transition-normal);
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.1));
+  }
+  
+  .menu-details[open] .chevron {
+    filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.3));
+  }
+  
+  .submenu-list {
+    list-style: none;
+    padding: var(--premium-space-sm) 0;
+    margin: 0;
+    border-top: 1px solid var(--premium-glass-border);
+    background: rgba(255, 255, 255, 0.5);
+    animation: submenuSlideIn 0.3s ease-out;
+  }
+  
+  .submenu-list li {
+    opacity: 0;
+    transform: translateX(-10px);
+    animation: submenuItemIn 0.2s ease-out forwards;
+  }
+  
+  .submenu-list li:nth-child(1) { animation-delay: 0.1s; }
+  .submenu-list li:nth-child(2) { animation-delay: 0.15s; }
+  .submenu-list li:nth-child(3) { animation-delay: 0.2s; }
+  .submenu-list li:nth-child(4) { animation-delay: 0.25s; }
+  
+  @keyframes submenuSlideIn {
+    from {
+      opacity: 0;
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    to {
+      opacity: 1;
+      max-height: 200px;
+      padding-top: var(--premium-space-sm);
+      padding-bottom: var(--premium-space-sm);
+    }
+  }
+  
+  @keyframes submenuItemIn {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  /* Dark mode adjustments */
+  [data-theme="dark"] .logo-title {
+    color: var(--premium-gray-100);
+  }
+  
+  [data-theme="dark"] .section-title {
+    color: var(--premium-gray-200);
+  }
+  
+  [data-theme="dark"] .nav-link {
+    color: var(--premium-gray-300);
+  }
+  
+  [data-theme="dark"] .nav-link:hover {
+    color: var(--premium-primary-light);
+  }
+  
+  [data-theme="dark"] .menu-summary {
+    color: var(--premium-gray-300);
+  }
+  
+  [data-theme="dark"] .menu-summary:hover {
+    background: var(--premium-gray-800);
+    color: var(--premium-primary-light);
+  }
+  
+  [data-theme="dark"] .submenu-list {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    .sidebar-header {
+      padding: 0 var(--premium-space-sm) var(--premium-space-md);
+    }
+    
+    .logo-title {
+      font-size: 0.9rem;
+    }
+    
+    .logo-subtitle {
+      font-size: 0.7rem;
+    }
+    
+    .nav-link {
+      padding: var(--premium-space-xs) var(--premium-space-sm);
+      font-size: 0.8rem;
+    }
+    
+    .section-title {
+      padding: var(--premium-space-xs) var(--premium-space-sm);
+      font-size: 0.8rem;
+    }
+  }
+  
+  /* Ripple effect */
+  .ripple-effect {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: scale(0);
+    animation: rippleAnimation 0.6s ease-out;
+  }
+  
+  @keyframes rippleAnimation {
+    0% {
+      transform: scale(0);
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+  
+  /* Navigation link enhancements */
+  .nav-link {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--premium-gradient-primary);
+    transition: width var(--premium-transition-normal);
+  }
+  
+  .nav-link:hover::after {
+    width: 100%;
+  }
+  
+  /* Menu summary enhancements */
+  .menu-summary {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .menu-summary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.1), transparent);
+    transition: all var(--premium-transition-slow);
+  }
+  
+  .menu-summary:hover::before {
+    left: 100%;
+  }
+  
+  /* Animation enhancements */
+  .sidebar-section {
+    opacity: 0;
+    animation: fadeInUp 0.4s ease-out forwards;
+  }
+  
+  .sidebar-section:nth-child(1) { animation-delay: 0.1s; }
+  .sidebar-section:nth-child(2) { animation-delay: 0.2s; }
+  .sidebar-section:nth-child(3) { animation-delay: 0.3s; }
+  .sidebar-section:nth-child(4) { animation-delay: 0.4s; }
+  
+  /* Loading states */
+  .sidebar-section.loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  
+  .sidebar-section.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: loading 1.5s infinite;
+  }
+  
+  @keyframes loading {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+</style>

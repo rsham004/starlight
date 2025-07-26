@@ -1,23 +1,16 @@
-import { execSync } from 'child_process';
-import { existsSync, rmSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
-import { join, dirname } from 'path';
+import { existsSync, rmSync, mkdirSync, writeFileSync } from 'fs';
+import { join } from 'path';
 import path from 'path';
+import { GitContentManager } from './src/content/loaders/git-loader.js';
 
-// Use WIKI_CONTENT_ACCESS_TOKEN for wiki access
-const WIKI_TOKEN = process.env.WIKI_CONTENT_ACCESS_TOKEN || process.env.GITHUB_TOKEN;
-const REPO_URL = WIKI_TOKEN 
-  ? `https://x-access-token:${WIKI_TOKEN}@github.com/AI-Product-Development/wiki.git`
-  : 'https://github.com/AI-Product-Development/wiki.git';
-const TEMP_DIR = './.wiki-sync';
+const REPO_URL = 'https://github.com/AI-Product-Development/wiki.git';
 const CONTENT_DIR = './src/content/docs';
 
-console.log('🔄 Syncing content from GitHub wiki...');
+console.log('🔄 Syncing content from GitHub wiki via API...');
 
 try {
-  // Clean up existing temp directory
-  if (existsSync(TEMP_DIR)) {
-    rmSync(TEMP_DIR, { recursive: true, force: true });
-  }
+  // Initialize GitContentManager
+  const manager = new GitContentManager(REPO_URL);
   
   // Clean up existing content
   if (existsSync(CONTENT_DIR)) {
@@ -30,32 +23,28 @@ try {
   }
   mkdirSync(CONTENT_DIR, { recursive: true });
   
-  // Clone the repository
-  console.log('📥 Cloning repository...');
-  execSync(`git clone --depth 1 ${REPO_URL} ${TEMP_DIR}`, { stdio: 'inherit' });
+  // Get repository contents via GitHub API
+  console.log('📥 Fetching repository contents via GitHub API...');
+  const contents = await manager.makeGitHubAPIRequest(`/repos/${manager.owner}/${manager.repo}/contents/`);
   
-  // Copy and process markdown files
-  console.log('📝 Processing markdown files...');
-  
-  function processDirectory(sourceDir, targetDir) {
-    if (!existsSync(sourceDir)) return;
-    
-    const items = readdirSync(sourceDir);
+  // API-based recursive directory processing
+  async function processDirectoryAPI(path = '', targetDir = CONTENT_DIR) {
+    const items = await manager.makeGitHubAPIRequest(`/repos/${manager.owner}/${manager.repo}/contents/${path}`);
     
     for (const item of items) {
-      const sourcePath = join(sourceDir, item);
-      const targetPath = join(targetDir, item);
-      const stat = statSync(sourcePath);
-      
-      if (stat.isDirectory()) {
-        // Skip .git directory
-        if (item === '.git') continue;
+      if (item.type === 'dir') {
+        // Create directory
+        const dirPath = join(targetDir, item.name);
+        mkdirSync(dirPath, { recursive: true });
         
-        mkdirSync(targetPath, { recursive: true });
-        processDirectory(sourcePath, targetPath);
-      } else if (item.endsWith('.md')) {
+        // Recursively process subdirectory
+        const subPath = path ? `${path}/${item.name}` : item.name;
+        await processDirectoryAPI(subPath, dirPath);
+        
+      } else if (item.type === 'file' && item.name.endsWith('.md')) {
         // Process markdown files
-        let content = readFileSync(sourcePath, 'utf-8');
+        console.log(`📄 Processing: ${item.path}`);
+        let content = await manager.readFile(item.path);
         
         // Fix image paths to point to GitHub raw URLs
         content = content.replace(
@@ -72,7 +61,7 @@ try {
         
         // Ensure frontmatter exists
         if (!content.startsWith('---')) {
-          const title = path.basename(item, '.md').replace(/[_-]/g, ' ');
+          const title = path.basename(item.name, '.md').replace(/[_-]/g, ' ');
           const frontmatter = `---
 title: "${title}"
 description: "AI Product Development Wiki content"
@@ -121,17 +110,15 @@ description: "AI Product Development Wiki content"
           }
         }
         
+        const targetPath = join(targetDir, item.name);
         writeFileSync(targetPath, content, 'utf-8');
-        console.log(`✅ Processed: ${item}`);
+        console.log(`✅ Processed: ${item.name}`);
       }
     }
   }
   
-  // Process the content
-  processDirectory(TEMP_DIR, CONTENT_DIR);
-  
-  // Clean up temp directory
-  rmSync(TEMP_DIR, { recursive: true, force: true });
+  // Process the content via API
+  await processDirectoryAPI();
   
   console.log('✅ Content sync completed successfully!');
   

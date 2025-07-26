@@ -1,0 +1,22 @@
+<svg width="110" height="24" viewBox="0 0 110 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="workingGroupBadgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Badge background -->
+  <rect x="0" y="0" width="110" height="24" rx="12" fill="url(#workingGroupBadgeGradient)"/>
+  
+  <!-- Users icon -->
+  <g transform="translate(6, 6)">
+    <circle cx="4" cy="4" r="2" fill="white"/>
+    <circle cx="8" cy="4" r="2" fill="white" opacity="0.8"/>
+    <path d="M0 11 Q2 9 4 9 Q6 9 8 11" stroke="white" stroke-width="1.2" fill="none"/>
+    <path d="M4 11 Q6 9 8 9 Q10 9 12 11" stroke="white" stroke-width="1.2" fill="none" opacity="0.8"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="22" y="16" fill="white" font-family="Inter, sans-serif" font-size="9" font-weight="600">WORKING GROUP</text>
+</svg>

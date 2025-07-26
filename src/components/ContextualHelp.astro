@@ -1,0 +1,583 @@
+---
+// Contextual Help System - Provides role-based guidance and progressive disclosure
+---
+
+<div id="contextual-help" class="help-system">
+  <!-- Help Toggle Button -->
+  <button id="help-toggle" class="help-toggle" title="Get Help">
+    <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+      <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+    </svg>
+  </button>
+  
+  <!-- Help Panel -->
+  <div id="help-panel" class="help-panel">
+    <div class="help-header">
+      <h3 class="help-title">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+        </svg>
+        Quick Help
+      </h3>
+      <button id="help-close" class="help-close">
+        <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854z"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="help-content" id="help-content">
+      <div class="help-loading">
+        <div class="loading-spinner"></div>
+        <span>Loading help...</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Help Overlay -->
+  <div id="help-overlay" class="help-overlay"></div>
+</div>
+
+<script>
+  class ContextualHelpSystem {
+    constructor() {
+      this.helpToggle = document.getElementById('help-toggle');
+      this.helpPanel = document.getElementById('help-panel');
+      this.helpOverlay = document.getElementById('help-overlay');
+      this.helpClose = document.getElementById('help-close');
+      this.helpContent = document.getElementById('help-content');
+      
+      this.isOpen = false;
+      this.currentPath = window.location.pathname;
+      this.userRole = 'public';
+      
+      this.init();
+    }
+    
+    async init() {
+      await this.loadUserRole();
+      this.setupEventListeners();
+      this.positionHelpButton();
+      this.preloadContextualHelp();
+    }
+    
+    async loadUserRole() {
+      try {
+        const response = await fetch('/api/auth/user');
+        if (response.ok) {
+          const userData = await response.json();
+          this.userRole = userData.role || 'public';
+        }
+      } catch {
+        this.userRole = 'public';
+      }
+    }
+    
+    setupEventListeners() {
+      this.helpToggle.addEventListener('click', this.toggleHelp.bind(this));
+      this.helpClose.addEventListener('click', this.closeHelp.bind(this));
+      this.helpOverlay.addEventListener('click', this.closeHelp.bind(this));
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.isOpen) {
+          this.closeHelp();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+          e.preventDefault();
+          this.toggleHelp();
+        }
+      });
+      
+      // Smart positioning on scroll
+      window.addEventListener('scroll', this.positionHelpButton.bind(this));
+    }
+    
+    positionHelpButton() {
+      const scrollY = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      
+      // Position help button optimally based on scroll position
+      if (scrollY > 100) {
+        this.helpToggle.style.bottom = '2rem';
+        this.helpToggle.style.opacity = '0.9';
+      } else {
+        this.helpToggle.style.bottom = '1.5rem';
+        this.helpToggle.style.opacity = '0.7';
+      }
+    }
+    
+    async toggleHelp() {
+      if (this.isOpen) {
+        this.closeHelp();
+      } else {
+        await this.openHelp();
+      }
+    }
+    
+    async openHelp() {
+      this.isOpen = true;
+      this.helpPanel.classList.add('help-panel-open');
+      this.helpOverlay.classList.add('help-overlay-active');
+      this.helpToggle.classList.add('help-toggle-active');
+      
+      // Load contextual content
+      await this.loadContextualContent();
+      
+      // Focus management
+      this.helpClose.focus();
+    }
+    
+    closeHelp() {
+      this.isOpen = false;
+      this.helpPanel.classList.remove('help-panel-open');
+      this.helpOverlay.classList.remove('help-overlay-active');
+      this.helpToggle.classList.remove('help-toggle-active');
+      
+      // Return focus
+      this.helpToggle.focus();
+    }
+    
+    async preloadContextualHelp() {
+      // Preload help content for faster display
+      setTimeout(() => {
+        this.generateHelpContent();
+      }, 2000);
+    }
+    
+    async loadContextualContent() {
+      this.helpContent.innerHTML = `
+        <div class="help-loading">
+          <div class="loading-spinner"></div>
+          <span>Loading contextual help...</span>
+        </div>
+      `;
+      
+      // Simulate loading and then show content
+      setTimeout(() => {
+        this.generateHelpContent();
+      }, 300);
+    }
+    
+    generateHelpContent() {
+      const helpData = this.getContextualHelp();
+      
+      this.helpContent.innerHTML = `
+        <div class="help-section">
+          <h4 class="help-section-title">Getting Started</h4>
+          <div class="help-tips">
+            ${helpData.quickTips.map(tip => `
+              <div class="help-tip">
+                <div class="tip-icon">${tip.icon}</div>
+                <div class="tip-content">
+                  <strong>${tip.title}</strong>
+                  <p>${tip.description}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="help-section">
+          <h4 class="help-section-title">Quick Actions</h4>
+          <div class="help-actions">
+            ${helpData.quickActions.map(action => `
+              <a href="${action.path}" class="help-action-link">
+                <span class="action-icon">${action.icon}</span>
+                <span class="action-text">${action.title}</span>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="help-section">
+          <h4 class="help-section-title">Keyboard Shortcuts</h4>
+          <div class="help-shortcuts">
+            <div class="shortcut-item">
+              <kbd>Ctrl</kbd> + <kbd>/</kbd>
+              <span>Toggle this help panel</span>
+            </div>
+            <div class="shortcut-item">
+              <kbd>Esc</kbd>
+              <span>Close help panel</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    getContextualHelp() {
+      const baseHelp = {
+        quickTips: [
+          {
+            icon: '🚀',
+            title: 'Welcome to AI Product Development',
+            description: 'This is your hub for collaborative AI development and learning.'
+          }
+        ],
+        quickActions: [
+          {
+            path: '/challenges/overview',
+            icon: '📋',
+            title: 'View Challenges'
+          }
+        ]
+      };
+      
+      // Role-specific help
+      const roleHelp = {
+        'management': {
+          quickTips: [
+            {
+              icon: '👑',
+              title: 'Management Dashboard',
+              description: 'Access team management tools and oversee community progress.'
+            },
+            {
+              icon: '📊',
+              title: 'Analytics & Insights',
+              description: 'Monitor community engagement and project progress.'
+            }
+          ],
+          quickActions: [
+            { path: '/Circle_Management/management_tasks', icon: '⚙️', title: 'Management Tasks' },
+            { path: '/Circle_Management/member_table', icon: '👥', title: 'Member Directory' }
+          ]
+        },
+        'working_group': {
+          quickTips: [
+            {
+              icon: '🛠️',
+              title: 'AI Builders Circle',
+              description: 'Collaborate with fellow builders on cutting-edge AI challenges.'
+            },
+            {
+              icon: '🎯',
+              title: 'Your Challenges',
+              description: 'Access your personalized challenge library and track progress.'
+            }
+          ],
+          quickActions: [
+            { path: '/challenges/Challenges_list', icon: '🏆', title: 'Challenge Library' },
+            { path: '/Events/Events_overview', icon: '📅', title: 'Upcoming Events' }
+          ]
+        },
+        'public': {
+          quickTips: [
+            {
+              icon: '🌟',
+              title: 'Start Your AI Journey',
+              description: 'Explore challenges, learn from the community, and build amazing AI solutions.'
+            },
+            {
+              icon: '🤝',
+              title: 'Join the Community',
+              description: 'Sign up to unlock advanced features and collaborate with AI builders.'
+            }
+          ],
+          quickActions: [
+            { path: '/challenges/overview', icon: '📋', title: 'Explore Challenges' },
+            { path: '/contributing', icon: '🤝', title: 'How to Contribute' }
+          ]
+        }
+      };
+      
+      const specificHelp = roleHelp[this.userRole] || roleHelp.public;
+      
+      return {
+        quickTips: [...baseHelp.quickTips, ...specificHelp.quickTips],
+        quickActions: [...baseHelp.quickActions, ...specificHelp.quickActions]
+      };
+    }
+  }
+  
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    new ContextualHelpSystem();
+  });
+</script>
+
+<style>
+  .help-system {
+    position: fixed;
+    z-index: 9999;
+  }
+  
+  .help-toggle {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 48px;
+    height: 48px;
+    background: var(--premium-gradient-primary);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--premium-shadow-lg);
+    transition: all var(--premium-transition-normal);
+    opacity: 0.7;
+    z-index: 10000;
+  }
+  
+  .help-toggle:hover {
+    transform: scale(1.1);
+    opacity: 1;
+    box-shadow: var(--premium-shadow-xl);
+  }
+  
+  .help-toggle-active {
+    background: var(--premium-primary-dark);
+    transform: rotate(180deg);
+  }
+  
+  .help-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--premium-transition-normal);
+    z-index: 9998;
+  }
+  
+  .help-overlay-active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .help-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 90vw;
+    max-width: 480px;
+    max-height: 80vh;
+    background: white;
+    border-radius: var(--premium-radius-xl);
+    box-shadow: var(--premium-shadow-xl);
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--premium-transition-normal);
+    z-index: 9999;
+    overflow: hidden;
+  }
+  
+  .help-panel-open {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .help-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--premium-space-lg);
+    background: var(--premium-gradient-primary);
+    color: white;
+  }
+  
+  .help-title {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .help-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: var(--premium-space-xs);
+    border-radius: var(--premium-radius-sm);
+    transition: all var(--premium-transition-fast);
+  }
+  
+  .help-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .help-content {
+    max-height: calc(80vh - 80px);
+    overflow-y: auto;
+    padding: var(--premium-space-lg);
+  }
+  
+  .help-loading {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+    justify-content: center;
+    padding: var(--premium-space-xl);
+    color: var(--premium-gray-600);
+  }
+  
+  .loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--premium-gray-300);
+    border-top: 2px solid var(--premium-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  .help-section {
+    margin-bottom: var(--premium-space-xl);
+  }
+  
+  .help-section:last-child {
+    margin-bottom: 0;
+  }
+  
+  .help-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--premium-gray-800);
+    margin: 0 0 var(--premium-space-md);
+    padding-bottom: var(--premium-space-sm);
+    border-bottom: 1px solid var(--premium-gray-200);
+  }
+  
+  .help-tip {
+    display: flex;
+    gap: var(--premium-space-md);
+    margin-bottom: var(--premium-space-md);
+    padding: var(--premium-space-md);
+    background: var(--premium-gray-50);
+    border-radius: var(--premium-radius-md);
+  }
+  
+  .tip-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  
+  .tip-content strong {
+    display: block;
+    color: var(--premium-gray-800);
+    margin-bottom: var(--premium-space-xs);
+  }
+  
+  .tip-content p {
+    margin: 0;
+    color: var(--premium-gray-600);
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+  
+  .help-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--premium-space-sm);
+  }
+  
+  .help-action-link {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+    padding: var(--premium-space-md);
+    background: var(--premium-glass);
+    border: 1px solid var(--premium-glass-border);
+    border-radius: var(--premium-radius-md);
+    color: inherit;
+    text-decoration: none;
+    transition: all var(--premium-transition-normal);
+  }
+  
+  .help-action-link:hover {
+    background: var(--premium-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--premium-shadow-md);
+  }
+  
+  .help-shortcuts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--premium-space-sm);
+  }
+  
+  .shortcut-item {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-md);
+    padding: var(--premium-space-sm);
+  }
+  
+  .shortcut-item kbd {
+    background: var(--premium-gray-200);
+    border: 1px solid var(--premium-gray-300);
+    border-radius: var(--premium-radius-sm);
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    font-family: var(--premium-font-mono);
+  }
+  
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .help-toggle {
+      bottom: 1rem;
+      right: 1rem;
+      width: 44px;
+      height: 44px;
+    }
+    
+    .help-panel {
+      width: 95vw;
+      max-height: 90vh;
+    }
+    
+    .help-header {
+      padding: var(--premium-space-md);
+    }
+    
+    .help-content {
+      padding: var(--premium-space-md);
+    }
+    
+    .help-actions {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* Dark mode */
+  [data-theme="dark"] .help-panel {
+    background: var(--premium-gray-800);
+    border: 1px solid var(--premium-gray-700);
+  }
+  
+  [data-theme="dark"] .help-section-title {
+    color: var(--premium-gray-200);
+    border-color: var(--premium-gray-700);
+  }
+  
+  [data-theme="dark"] .help-tip {
+    background: var(--premium-gray-700);
+  }
+  
+  [data-theme="dark"] .tip-content strong {
+    color: var(--premium-gray-200);
+  }
+  
+  [data-theme="dark"] .tip-content p {
+    color: var(--premium-gray-400);
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>

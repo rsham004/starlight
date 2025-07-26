@@ -1,0 +1,67 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient definitions -->
+    <radialGradient id="orb1" cx="0.3" cy="0.3" r="0.7">
+      <stop offset="0%" style="stop-color:#0066ff;stop-opacity:0.8" />
+      <stop offset="70%" style="stop-color:#0066ff;stop-opacity:0.4" />
+      <stop offset="100%" style="stop-color:#0066ff;stop-opacity:0.1" />
+    </radialGradient>
+    
+    <radialGradient id="orb2" cx="0.3" cy="0.3" r="0.7">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:0.7" />
+      <stop offset="70%" style="stop-color:#6366f1;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:0.1" />
+    </radialGradient>
+    
+    <radialGradient id="orb3" cx="0.3" cy="0.3" r="0.7">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:0.6" />
+      <stop offset="70%" style="stop-color:#8b5cf6;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.05" />
+    </radialGradient>
+    
+    <!-- Blur filter for soft glow -->
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Large primary orb -->
+  <circle cx="150" cy="200" r="80" fill="url(#orb1)" filter="url(#softGlow)">
+    <animate attributeName="cy" values="200;180;200" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Medium secondary orb -->
+  <circle cx="280" cy="120" r="50" fill="url(#orb2)" filter="url(#softGlow)">
+    <animate attributeName="cx" values="280;300;280" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="120;100;120" dur="3.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.7;0.9;0.7" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Small accent orb -->
+  <circle cx="320" cy="280" r="30" fill="url(#orb3)" filter="url(#softGlow)">
+    <animate attributeName="cx" values="320;340;320" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="280;260;280" dur="4.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.6;0.8;0.6" dur="5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Tiny floating orbs -->
+  <circle cx="80" cy="80" r="15" fill="url(#orb1)" opacity="0.4" filter="url(#softGlow)">
+    <animate attributeName="cy" values="80;60;80" dur="7s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.4;0.6;0.4" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="350" cy="350" r="12" fill="url(#orb2)" opacity="0.3" filter="url(#softGlow)">
+    <animate attributeName="cx" values="350;370;350" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.3;0.5;0.3" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="50" cy="320" r="18" fill="url(#orb3)" opacity="0.5" filter="url(#softGlow)">
+    <animate attributeName="cy" values="320;300;320" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.5;0.7;0.5" dur="3.5s" repeatCount="indefinite"/>
+  </circle>
+</svg>

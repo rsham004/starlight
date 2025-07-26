@@ -1,21 +1,62 @@
 ---
 import type { Props } from '@astrojs/starlight/props';
 import Default from '@astrojs/starlight/components/PageFrame.astro';
-import CustomAuthStatus from './CustomAuthStatus.astro';
+import PremiumAuthStatus from './PremiumAuthStatus.astro';
+import PremiumDashboard from './PremiumDashboard.astro';
+import ContextualHelp from './ContextualHelp.astro';
+import SmartLandingRouter from './SmartLandingRouter.astro';
+import SmartBreadcrumbs from './SmartBreadcrumbs.astro';
 import ClerkScript from './ClerkScript.astro';
+
+// Check if this is the homepage to show the dashboard
+const isHomepage = Astro.url.pathname === '/' || Astro.url.pathname === '/wiki/';
 ---
 
 <Default {...Astro.props}>
   <ClerkScript />
-  <CustomAuthStatus />
+  <PremiumAuthStatus />
+  <ContextualHelp />
+  <SmartLandingRouter />
+  <SmartBreadcrumbs />
   <slot />
+  {isHomepage && <PremiumDashboard />}
 </Default>
 
+<!-- Premium styles are loaded via astro.config.mjs customCss -->
+
 <style>
-  .auth-floating {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    z-index: 1000;
+  /* Premium page frame enhancements */
+  html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  /* Enhance Starlight's existing components with premium styling */
+  :global([data-theme="light"]) {
+    --sl-color-accent: var(--premium-primary);
+    --sl-color-accent-high: var(--premium-primary-dark);
+    --sl-color-accent-low: var(--premium-primary-light);
+  }
+  
+  :global([data-theme="dark"]) {
+    --sl-color-accent: var(--premium-primary-light);
+    --sl-color-accent-high: var(--premium-primary);
+    --sl-color-accent-low: var(--premium-primary-dark);
+  }
+  
+  /* Premium page transitions */
+  :global(main) {
+    animation: fadeInUp 0.5s ease-out;
+  }
+  
+  /* Premium scroll behavior */
+  :global(html) {
+    scroll-behavior: smooth;
+  }
+  
+  /* Premium focus states */
+  :global(*:focus-visible) {
+    outline: 2px solid var(--premium-primary);
+    outline-offset: 2px;
+    border-radius: var(--premium-radius-sm);
   }
 </style>

@@ -1,0 +1,1184 @@
+---
+// Personalized Dashboard Widgets - Advanced customizable interface components
+---
+
+<div id="personalized-widgets" class="widgets-container">
+  <!-- Widget Customization Panel -->
+  <div id="widget-customizer" class="widget-customizer">
+    <button id="customize-toggle" class="customize-button">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+      </svg>
+      Customize
+    </button>
+    <div id="customizer-panel" class="customizer-panel">
+      <h4>Customize Your Dashboard</h4>
+      <div id="widget-options" class="widget-options">
+        <!-- Widget options populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Widget Grid -->
+  <div id="widget-grid" class="widget-grid">
+    <!-- Widgets rendered dynamically based on preferences -->
+  </div>
+</div>
+
+<script>
+  class PersonalizedWidgets {
+    constructor() {
+      this.widgetGrid = document.getElementById('widget-grid');
+      this.customizeToggle = document.getElementById('customize-toggle');
+      this.customizerPanel = document.getElementById('customizer-panel');
+      this.widgetOptions = document.getElementById('widget-options');
+      
+      this.userRole = 'public';
+      this.userPreferences = this.loadUserPreferences();
+      this.availableWidgets = {};
+      this.activeWidgets = [];
+      
+      this.init();
+    }
+    
+    async init() {
+      await this.loadUserRole();
+      this.setupAvailableWidgets();
+      this.setupEventListeners();
+      this.renderCustomizerOptions();
+      this.renderActiveWidgets();
+    }
+    
+    async loadUserRole() {
+      try {
+        const response = await fetch('/api/auth/user');
+        if (response.ok) {
+          const userData = await response.json();
+          this.userRole = userData.role || 'public';
+        }
+      } catch {
+        this.userRole = 'public';
+      }
+    }
+    
+    loadUserPreferences() {
+      const saved = localStorage.getItem('starlight-widget-preferences');
+      return saved ? JSON.parse(saved) : {
+        enabledWidgets: [],
+        widgetPositions: {},
+        refreshIntervals: {},
+        compactMode: false
+      };
+    }
+    
+    saveUserPreferences() {
+      localStorage.setItem('starlight-widget-preferences', JSON.stringify(this.userPreferences));
+    }
+    
+    setupAvailableWidgets() {
+      this.availableWidgets = {
+        'activity-feed': {
+          title: 'Recent Activity',
+          description: 'Your latest interactions and updates',
+          icon: '📈',
+          component: this.createActivityWidget.bind(this),
+          roles: ['working_group', 'management'],
+          refreshInterval: 30000
+        },
+        'progress-tracker': {
+          title: 'Progress Tracker',
+          description: 'Track your challenge completion and achievements',
+          icon: '🎯',
+          component: this.createProgressWidget.bind(this),
+          roles: ['working_group', 'management'],
+          refreshInterval: 60000
+        },
+        'quick-stats': {
+          title: 'Quick Statistics',
+          description: 'Key metrics and performance indicators',
+          icon: '📊',
+          component: this.createStatsWidget.bind(this),
+          roles: ['management'],
+          refreshInterval: 120000
+        },
+        'upcoming-events': {
+          title: 'Upcoming Events',
+          description: 'Schedule and event reminders',
+          icon: '📅',
+          component: this.createEventsWidget.bind(this),
+          roles: ['working_group', 'management'],
+          refreshInterval: 300000
+        },
+        'recommendations': {
+          title: 'Recommended Content',
+          description: 'Personalized content suggestions',
+          icon: '💡',
+          component: this.createRecommendationsWidget.bind(this),
+          roles: ['public', 'working_group', 'management'],
+          refreshInterval: 600000
+        },
+        'team-updates': {
+          title: 'Team Updates',
+          description: 'Latest from your team and community',
+          icon: '👥',
+          component: this.createTeamWidget.bind(this),
+          roles: ['management'],
+          refreshInterval: 180000
+        }
+      };
+    }
+    
+    setupEventListeners() {
+      this.customizeToggle.addEventListener('click', this.toggleCustomizer.bind(this));
+      
+      // Close customizer when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.widget-customizer')) {
+          this.customizerPanel.classList.remove('panel-open');
+        }
+      });
+    }
+    
+    toggleCustomizer() {
+      this.customizerPanel.classList.toggle('panel-open');
+    }
+    
+    renderCustomizerOptions() {
+      const availableForRole = Object.entries(this.availableWidgets)
+        .filter(([id, widget]) => widget.roles.includes(this.userRole));
+      
+      this.widgetOptions.innerHTML = `
+        <div class="widget-categories">
+          ${availableForRole.map(([id, widget]) => `
+            <div class="widget-option">
+              <div class="widget-option-header">
+                <span class="widget-icon">${widget.icon}</span>
+                <div class="widget-info">
+                  <h5>${widget.title}</h5>
+                  <p>${widget.description}</p>
+                </div>
+                <label class="widget-toggle">
+                  <input type="checkbox" 
+                         data-widget-id="${id}"
+                         ${this.userPreferences.enabledWidgets.includes(id) ? 'checked' : ''}>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        
+        <div class="widget-settings">
+          <div class="setting-group">
+            <label class="setting-label">
+              <input type="checkbox" 
+                     id="compact-mode"
+                     ${this.userPreferences.compactMode ? 'checked' : ''}>
+              <span>Compact Mode</span>
+            </label>
+          </div>
+          <button id="reset-widgets" class="reset-button">Reset to Default</button>
+        </div>
+      `;
+      
+      // Setup option event listeners
+      this.widgetOptions.querySelectorAll('input[data-widget-id]').forEach(checkbox => {
+        checkbox.addEventListener('change', this.handleWidgetToggle.bind(this));
+      });
+      
+      document.getElementById('compact-mode').addEventListener('change', this.handleCompactModeToggle.bind(this));
+      document.getElementById('reset-widgets').addEventListener('click', this.resetToDefault.bind(this));
+    }
+    
+    handleWidgetToggle(e) {
+      const widgetId = e.target.dataset.widgetId;
+      
+      if (e.target.checked) {
+        if (!this.userPreferences.enabledWidgets.includes(widgetId)) {
+          this.userPreferences.enabledWidgets.push(widgetId);
+        }
+      } else {
+        this.userPreferences.enabledWidgets = this.userPreferences.enabledWidgets
+          .filter(id => id !== widgetId);
+      }
+      
+      this.saveUserPreferences();
+      this.renderActiveWidgets();
+    }
+    
+    handleCompactModeToggle(e) {
+      this.userPreferences.compactMode = e.target.checked;
+      this.saveUserPreferences();
+      this.widgetGrid.classList.toggle('compact-mode', e.target.checked);
+    }
+    
+    resetToDefault() {
+      this.userPreferences = {
+        enabledWidgets: this.getDefaultWidgets(),
+        widgetPositions: {},
+        refreshIntervals: {},
+        compactMode: false
+      };
+      this.saveUserPreferences();
+      this.renderCustomizerOptions();
+      this.renderActiveWidgets();
+    }
+    
+    getDefaultWidgets() {
+      const roleDefaults = {
+        'management': ['activity-feed', 'quick-stats', 'team-updates', 'upcoming-events'],
+        'working_group': ['activity-feed', 'progress-tracker', 'upcoming-events', 'recommendations'],
+        'public': ['recommendations']
+      };
+      return roleDefaults[this.userRole] || roleDefaults.public;
+    }
+    
+    renderActiveWidgets() {
+      if (this.userPreferences.enabledWidgets.length === 0) {
+        this.userPreferences.enabledWidgets = this.getDefaultWidgets();
+        this.saveUserPreferences();
+      }
+      
+      this.widgetGrid.innerHTML = '';
+      this.widgetGrid.classList.toggle('compact-mode', this.userPreferences.compactMode);
+      
+      this.userPreferences.enabledWidgets.forEach((widgetId, index) => {
+        const widget = this.availableWidgets[widgetId];
+        if (widget && widget.roles.includes(this.userRole)) {
+          const widgetElement = widget.component(widgetId);
+          widgetElement.style.animationDelay = `${index * 0.1}s`;
+          this.widgetGrid.appendChild(widgetElement);
+          
+          // Setup auto-refresh if configured
+          if (widget.refreshInterval) {
+            this.setupWidgetRefresh(widgetId, widget.refreshInterval);
+          }
+        }
+      });
+    }
+    
+    createActivityWidget(widgetId) {
+      const widget = document.createElement('div');
+      widget.className = 'dashboard-widget activity-widget';
+      widget.id = `widget-${widgetId}`;
+      
+      widget.innerHTML = `
+        <div class="widget-header">
+          <div class="widget-title">
+            <span class="widget-icon">📈</span>
+            <h4>Recent Activity</h4>
+          </div>
+          <div class="widget-actions">
+            <button class="widget-refresh" data-widget="${widgetId}">
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="widget-content">
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-icon">🏆</div>
+              <div class="activity-text">
+                <strong>Challenge completed:</strong> AI Ethics Framework
+                <small>2 hours ago</small>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">💬</div>
+              <div class="activity-text">
+                <strong>New discussion:</strong> Machine Learning Best Practices
+                <small>4 hours ago</small>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">📝</div>
+              <div class="activity-text">
+                <strong>Documentation updated:</strong> API Reference Guide
+                <small>1 day ago</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      return widget;
+    }
+    
+    createProgressWidget(widgetId) {
+      const widget = document.createElement('div');
+      widget.className = 'dashboard-widget progress-widget';
+      widget.id = `widget-${widgetId}`;
+      
+      widget.innerHTML = `
+        <div class="widget-header">
+          <div class="widget-title">
+            <span class="widget-icon">🎯</span>
+            <h4>Progress Tracker</h4>
+          </div>
+        </div>
+        <div class="widget-content">
+          <div class="progress-stats">
+            <div class="progress-item">
+              <div class="progress-circle" data-progress="75">
+                <svg width="60" height="60">
+                  <circle cx="30" cy="30" r="25" stroke="var(--premium-gray-200)" stroke-width="4" fill="none"/>
+                  <circle cx="30" cy="30" r="25" stroke="var(--premium-primary)" stroke-width="4" fill="none"
+                          stroke-dasharray="157" stroke-dashoffset="39" stroke-linecap="round"/>
+                </svg>
+                <span class="progress-value">75%</span>
+              </div>
+              <div class="progress-label">Challenges</div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-circle" data-progress="60">
+                <svg width="60" height="60">
+                  <circle cx="30" cy="30" r="25" stroke="var(--premium-gray-200)" stroke-width="4" fill="none"/>
+                  <circle cx="30" cy="30" r="25" stroke="var(--premium-secondary)" stroke-width="4" fill="none"
+                          stroke-dasharray="157" stroke-dashoffset="63" stroke-linecap="round"/>
+                </svg>
+                <span class="progress-value">60%</span>
+              </div>
+              <div class="progress-label">Learning Path</div>
+            </div>
+          </div>
+          <div class="achievement-badges">
+            <div class="badge earned">🏅 First Challenge</div>
+            <div class="badge earned">⚡ Speed Learner</div>
+            <div class="badge locked">🚀 Expert Level</div>
+          </div>
+        </div>
+      `;
+      
+      return widget;
+    }
+    
+    createStatsWidget(widgetId) {
+      const widget = document.createElement('div');
+      widget.className = 'dashboard-widget stats-widget';
+      widget.id = `widget-${widgetId}`;
+      
+      widget.innerHTML = `
+        <div class="widget-header">
+          <div class="widget-title">
+            <span class="widget-icon">📊</span>
+            <h4>Quick Statistics</h4>
+          </div>
+        </div>
+        <div class="widget-content">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" data-count="156">0</div>
+              <div class="stat-label">Active Members</div>
+              <div class="stat-change positive">+12 this week</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" data-count="23">0</div>
+              <div class="stat-label">Challenges</div>
+              <div class="stat-change positive">+3 new</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" data-count="89">0</div>
+              <div class="stat-label">Completions</div>
+              <div class="stat-change positive">+15 today</div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Animate counters
+      setTimeout(() => {
+        widget.querySelectorAll('[data-count]').forEach(counter => {
+          this.animateCounter(counter);
+        });
+      }, 500);
+      
+      return widget;
+    }
+    
+    createEventsWidget(widgetId) {
+      const widget = document.createElement('div');
+      widget.className = 'dashboard-widget events-widget';
+      widget.id = `widget-${widgetId}`;
+      
+      widget.innerHTML = `
+        <div class="widget-header">
+          <div class="widget-title">
+            <span class="widget-icon">📅</span>
+            <h4>Upcoming Events</h4>
+          </div>
+        </div>
+        <div class="widget-content">
+          <div class="events-list">
+            <div class="event-item">
+              <div class="event-date">
+                <span class="date-day">28</span>
+                <span class="date-month">Jul</span>
+              </div>
+              <div class="event-details">
+                <h5>AI Workshop Series</h5>
+                <p>Deep Learning Fundamentals</p>
+                <small>2:00 PM - 4:00 PM</small>
+              </div>
+            </div>
+            <div class="event-item">
+              <div class="event-date">
+                <span class="date-day">30</span>
+                <span class="date-month">Jul</span>
+              </div>
+              <div class="event-details">
+                <h5>Community Meetup</h5>
+                <p>Project Showcase & Networking</p>
+                <small>6:00 PM - 8:00 PM</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      return widget;
+    }
+    
+    createRecommendationsWidget(widgetId) {
+      const widget = document.createElement('div');
+      widget.className = 'dashboard-widget recommendations-widget';
+      widget.id = `widget-${widgetId}`;
+      
+      widget.innerHTML = `
+        <div class="widget-header">
+          <div class="widget-title">
+            <span class="widget-icon">💡</span>
+            <h4>Recommended for You</h4>
+          </div>
+        </div>
+        <div class="widget-content">
+          <div class="recommendations-list">
+            <a href="/challenges/machine-learning-basics" class="recommendation-item">
+              <div class="rec-icon">🤖</div>
+              <div class="rec-content">
+                <h5>Machine Learning Basics</h5>
+                <p>Perfect next step based on your progress</p>
+                <div class="rec-tags">
+                  <span class="rec-tag">Beginner</span>
+                  <span class="rec-tag">ML</span>
+                </div>
+              </div>
+            </a>
+            <a href="/Events/ai-ethics-discussion" class="recommendation-item">
+              <div class="rec-icon">🎭</div>
+              <div class="rec-content">
+                <h5>AI Ethics Discussion</h5>
+                <p>Join the conversation on responsible AI</p>
+                <div class="rec-tags">
+                  <span class="rec-tag">Discussion</span>
+                  <span class="rec-tag">Ethics</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      `;
+      
+      return widget;
+    }
+    
+    createTeamWidget(widgetId) {
+      const widget = document.createElement('div');
+      widget.className = 'dashboard-widget team-widget';
+      widget.id = `widget-${widgetId}`;
+      
+      widget.innerHTML = `
+        <div class="widget-header">
+          <div class="widget-title">
+            <span class="widget-icon">👥</span>
+            <h4>Team Updates</h4>
+          </div>
+        </div>
+        <div class="widget-content">
+          <div class="team-updates">
+            <div class="update-item">
+              <div class="update-avatar">👤</div>
+              <div class="update-content">
+                <strong>Sarah Chen</strong> completed Advanced NLP Challenge
+                <small>30 minutes ago</small>
+              </div>
+            </div>
+            <div class="update-item">
+              <div class="update-avatar">👤</div>
+              <div class="update-content">
+                <strong>Mike Johnson</strong> started Computer Vision project
+                <small>2 hours ago</small>
+              </div>
+            </div>
+            <div class="update-item">
+              <div class="update-avatar">👤</div>
+              <div class="update-content">
+                <strong>Team Alpha</strong> reached milestone in Robotics challenge
+                <small>1 day ago</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      return widget;
+    }
+    
+    animateCounter(element) {
+      const target = parseInt(element.dataset.count);
+      const duration = 2000;
+      const increment = target / (duration / 16);
+      let current = 0;
+      
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          element.textContent = target;
+          clearInterval(timer);
+        } else {
+          element.textContent = Math.floor(current);
+        }
+      }, 16);
+    }
+    
+    setupWidgetRefresh(widgetId, interval) {
+      const refreshBtn = document.querySelector(`[data-widget="${widgetId}"]`);
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+          this.refreshWidget(widgetId);
+        });
+      }
+      
+      // Auto-refresh
+      setInterval(() => {
+        this.refreshWidget(widgetId);
+      }, interval);
+    }
+    
+    refreshWidget(widgetId) {
+      const widget = document.getElementById(`widget-${widgetId}`);
+      if (widget) {
+        widget.classList.add('refreshing');
+        
+        // Simulate refresh
+        setTimeout(() => {
+          widget.classList.remove('refreshing');
+          
+          // Add refresh animation
+          widget.style.transform = 'scale(1.02)';
+          setTimeout(() => {
+            widget.style.transform = '';
+          }, 200);
+        }, 1000);
+      }
+    }
+  }
+  
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    new PersonalizedWidgets();
+  });
+</script>
+
+<style>
+  .widgets-container {
+    position: relative;
+  }
+  
+  .widget-customizer {
+    position: relative;
+    margin-bottom: var(--premium-space-lg);
+  }
+  
+  .customize-button {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+    padding: var(--premium-space-sm) var(--premium-space-md);
+    background: var(--premium-glass);
+    border: 1px solid var(--premium-glass-border);
+    border-radius: var(--premium-radius-md);
+    color: var(--premium-gray-700);
+    cursor: pointer;
+    transition: all var(--premium-transition-normal);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .customize-button:hover {
+    background: var(--premium-primary);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--premium-shadow-md);
+  }
+  
+  .customizer-panel {
+    position: absolute;
+    top: calc(100% + var(--premium-space-sm));
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--premium-glass-border);
+    border-radius: var(--premium-radius-lg);
+    box-shadow: var(--premium-shadow-xl);
+    padding: var(--premium-space-lg);
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all var(--premium-transition-normal);
+  }
+  
+  .panel-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .customizer-panel h4 {
+    margin: 0 0 var(--premium-space-md);
+    color: var(--premium-gray-800);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  
+  .widget-option {
+    margin-bottom: var(--premium-space-md);
+  }
+  
+  .widget-option-header {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+    padding: var(--premium-space-sm);
+    border-radius: var(--premium-radius-md);
+    transition: background var(--premium-transition-fast);
+  }
+  
+  .widget-option-header:hover {
+    background: var(--premium-gray-50);
+  }
+  
+  .widget-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  
+  .widget-info {
+    flex: 1;
+  }
+  
+  .widget-info h5 {
+    margin: 0 0 2px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--premium-gray-800);
+  }
+  
+  .widget-info p {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--premium-gray-600);
+  }
+  
+  .widget-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+  
+  .widget-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--premium-gray-300);
+    transition: var(--premium-transition-normal);
+    border-radius: 12px;
+  }
+  
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    transition: var(--premium-transition-normal);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  
+  .widget-toggle input:checked + .toggle-slider {
+    background: var(--premium-primary);
+  }
+  
+  .widget-toggle input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+  }
+  
+  .widget-settings {
+    border-top: 1px solid var(--premium-gray-200);
+    padding-top: var(--premium-space-md);
+    margin-top: var(--premium-space-md);
+  }
+  
+  .setting-group {
+    margin-bottom: var(--premium-space-md);
+  }
+  
+  .setting-label {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--premium-gray-700);
+  }
+  
+  .reset-button {
+    background: var(--premium-gray-100);
+    border: 1px solid var(--premium-gray-300);
+    border-radius: var(--premium-radius-md);
+    padding: var(--premium-space-xs) var(--premium-space-sm);
+    font-size: 0.8rem;
+    color: var(--premium-gray-700);
+    cursor: pointer;
+    transition: all var(--premium-transition-normal);
+  }
+  
+  .reset-button:hover {
+    background: var(--premium-gray-200);
+    border-color: var(--premium-gray-400);
+  }
+  
+  .widget-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--premium-space-lg);
+    animation: fadeInUp 0.6s ease-out;
+  }
+  
+  .compact-mode {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--premium-space-md);
+  }
+  
+  .dashboard-widget {
+    background: white;
+    border: 1px solid var(--premium-glass-border);
+    border-radius: var(--premium-radius-lg);
+    box-shadow: var(--premium-shadow-sm);
+    overflow: hidden;
+    transition: all var(--premium-transition-normal);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: widgetFadeIn 0.5s ease-out forwards;
+  }
+  
+  .dashboard-widget:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--premium-shadow-lg);
+  }
+  
+  .dashboard-widget.refreshing {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+  
+  @keyframes widgetFadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .widget-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--premium-space-md);
+    background: var(--premium-gradient-subtle);
+    border-bottom: 1px solid var(--premium-glass-border);
+  }
+  
+  .widget-title {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+  }
+  
+  .widget-title h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--premium-gray-800);
+  }
+  
+  .widget-actions {
+    display: flex;
+    gap: var(--premium-space-xs);
+  }
+  
+  .widget-refresh {
+    background: none;
+    border: none;
+    color: var(--premium-gray-600);
+    cursor: pointer;
+    padding: var(--premium-space-xs);
+    border-radius: var(--premium-radius-sm);
+    transition: all var(--premium-transition-fast);
+  }
+  
+  .widget-refresh:hover {
+    background: var(--premium-gray-100);
+    color: var(--premium-primary);
+  }
+  
+  .widget-content {
+    padding: var(--premium-space-md);
+  }
+  
+  /* Widget-specific styles */
+  .activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--premium-space-sm);
+  }
+  
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--premium-space-sm);
+    padding: var(--premium-space-sm);
+    border-radius: var(--premium-radius-md);
+    transition: background var(--premium-transition-fast);
+  }
+  
+  .activity-item:hover {
+    background: var(--premium-gray-50);
+  }
+  
+  .activity-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  
+  .activity-text strong {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--premium-gray-800);
+    margin-bottom: 2px;
+  }
+  
+  .activity-text small {
+    font-size: 0.75rem;
+    color: var(--premium-gray-500);
+  }
+  
+  .progress-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: var(--premium-space-lg);
+  }
+  
+  .progress-item {
+    text-align: center;
+  }
+  
+  .progress-circle {
+    position: relative;
+    display: inline-block;
+    margin-bottom: var(--premium-space-sm);
+  }
+  
+  .progress-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--premium-gray-800);
+  }
+  
+  .progress-label {
+    font-size: 0.8rem;
+    color: var(--premium-gray-600);
+  }
+  
+  .achievement-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--premium-space-xs);
+  }
+  
+  .badge {
+    padding: var(--premium-space-xs) var(--premium-space-sm);
+    border-radius: var(--premium-radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .badge.earned {
+    background: var(--premium-primary);
+    color: white;
+  }
+  
+  .badge.locked {
+    background: var(--premium-gray-200);
+    color: var(--premium-gray-500);
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: var(--premium-space-md);
+  }
+  
+  .compact-mode .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--premium-space-sm);
+  }
+  
+  .stat-card {
+    text-align: center;
+    padding: var(--premium-space-sm);
+    border-radius: var(--premium-radius-md);
+    background: var(--premium-gray-50);
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--premium-primary);
+    display: block;
+    margin-bottom: var(--premium-space-xs);
+  }
+  
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--premium-gray-600);
+    margin-bottom: var(--premium-space-xs);
+  }
+  
+  .stat-change {
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+  
+  .stat-change.positive {
+    color: var(--premium-success);
+  }
+  
+  .events-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--premium-space-md);
+  }
+  
+  .event-item {
+    display: flex;
+    gap: var(--premium-space-md);
+    padding: var(--premium-space-sm);
+    border-radius: var(--premium-radius-md);
+    border-left: 3px solid var(--premium-primary);
+    background: var(--premium-gray-50);
+  }
+  
+  .event-date {
+    text-align: center;
+    flex-shrink: 0;
+  }
+  
+  .date-day {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--premium-primary);
+  }
+  
+  .date-month {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--premium-gray-600);
+    text-transform: uppercase;
+  }
+  
+  .event-details h5 {
+    margin: 0 0 2px;
+    font-size: 0.875rem;
+    color: var(--premium-gray-800);
+  }
+  
+  .event-details p {
+    margin: 0 0 2px;
+    font-size: 0.8rem;
+    color: var(--premium-gray-600);
+  }
+  
+  .event-details small {
+    font-size: 0.75rem;
+    color: var(--premium-gray-500);
+  }
+  
+  .recommendations-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--premium-space-sm);
+  }
+  
+  .recommendation-item {
+    display: flex;
+    gap: var(--premium-space-sm);
+    padding: var(--premium-space-sm);
+    border-radius: var(--premium-radius-md);
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--premium-transition-normal);
+    border: 1px solid transparent;
+  }
+  
+  .recommendation-item:hover {
+    background: var(--premium-primary);
+    color: white;
+    transform: translateX(4px);
+  }
+  
+  .rec-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  
+  .rec-content h5 {
+    margin: 0 0 2px;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  
+  .rec-content p {
+    margin: 0 0 var(--premium-space-xs);
+    font-size: 0.8rem;
+    opacity: 0.8;
+  }
+  
+  .rec-tags {
+    display: flex;
+    gap: var(--premium-space-xs);
+  }
+  
+  .rec-tag {
+    padding: 2px 6px;
+    background: var(--premium-gray-200);
+    border-radius: var(--premium-radius-sm);
+    font-size: 0.7rem;
+    color: var(--premium-gray-700);
+  }
+  
+  .recommendation-item:hover .rec-tag {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+  
+  .team-updates {
+    display: flex;
+    flex-direction: column;
+    gap: var(--premium-space-sm);
+  }
+  
+  .update-item {
+    display: flex;
+    gap: var(--premium-space-sm);
+    padding: var(--premium-space-sm);
+    border-radius: var(--premium-radius-md);
+    transition: background var(--premium-transition-fast);
+  }
+  
+  .update-item:hover {
+    background: var(--premium-gray-50);
+  }
+  
+  .update-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--premium-gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+  }
+  
+  .update-content strong {
+    color: var(--premium-gray-800);
+    font-size: 0.85rem;
+  }
+  
+  .update-content small {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--premium-gray-500);
+    margin-top: 2px;
+  }
+  
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .widget-grid {
+      grid-template-columns: 1fr;
+      gap: var(--premium-space-md);
+    }
+    
+    .customizer-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      right: auto;
+      transform: translate(-50%, -50%);
+      width: 90vw;
+      max-width: 400px;
+    }
+    
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  /* Dark mode */
+  [data-theme="dark"] .dashboard-widget {
+    background: var(--premium-gray-800);
+    border-color: var(--premium-gray-700);
+  }
+  
+  [data-theme="dark"] .widget-header {
+    background: var(--premium-gray-900);
+    border-color: var(--premium-gray-700);
+  }
+  
+  [data-theme="dark"] .widget-title h4 {
+    color: var(--premium-gray-200);
+  }
+  
+  [data-theme="dark"] .customizer-panel {
+    background: var(--premium-gray-800);
+    border-color: var(--premium-gray-700);
+  }
+  
+  [data-theme="dark"] .customizer-panel h4 {
+    color: var(--premium-gray-200);
+  }
+</style>

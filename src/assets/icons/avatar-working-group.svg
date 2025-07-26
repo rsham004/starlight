@@ -1,0 +1,25 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="workingGroupAvatarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0066ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="20" cy="20" r="19" fill="url(#workingGroupAvatarGradient)" stroke="white" stroke-width="2"/>
+  
+  <!-- User icon -->
+  <circle cx="20" cy="15" r="5" fill="white" opacity="0.95"/>
+  <path d="M10 32 Q10 26 15 24 Q17.5 23 20 23 Q22.5 23 25 24 Q30 26 30 32" fill="white" opacity="0.95"/>
+  
+  <!-- Working group indicator (gear) -->
+  <g transform="translate(26, 26)">
+    <circle cx="4" cy="4" r="5" fill="#10b981"/>
+    <circle cx="4" cy="4" r="2" fill="white"/>
+    <rect x="3.5" y="0" width="1" height="2" fill="#10b981"/>
+    <rect x="3.5" y="6" width="1" height="2" fill="#10b981"/>
+    <rect x="0" y="3.5" width="2" height="1" fill="#10b981"/>
+    <rect x="6" y="3.5" width="2" height="1" fill="#10b981"/>
+  </g>
+</svg>

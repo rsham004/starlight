@@ -1,0 +1,381 @@
+---
+// Smart Navigation Component - Tracks recently viewed content and provides intelligent suggestions
+---
+
+<div id="smart-nav" class="smart-navigation">
+  <div class="nav-section recent-section" id="recent-section" style="display: none;">
+    <h4 class="nav-section-title">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+      </svg>
+      Recently Viewed
+    </h4>
+    <ul class="recent-links" id="recent-links">
+      <!-- Recent links will be populated here -->
+    </ul>
+  </div>
+  
+  <div class="nav-section suggestions-section" id="suggestions-section" style="display: none;">
+    <h4 class="nav-section-title">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+      </svg>
+      Suggested for You
+    </h4>
+    <ul class="suggestion-links" id="suggestion-links">
+      <!-- Suggestions will be populated here -->
+    </ul>
+  </div>
+</div>
+
+<script>
+  class SmartNavigationManager {
+    constructor() {
+      this.maxRecentItems = 5;
+      this.recentKey = 'starlight-recent-pages';
+      this.smartNavEl = document.getElementById('smart-nav');
+      this.recentSection = document.getElementById('recent-section');
+      this.suggestionsSection = document.getElementById('suggestions-section');
+      this.recentLinks = document.getElementById('recent-links');
+      this.suggestionLinks = document.getElementById('suggestion-links');
+      
+      this.init();
+    }
+    
+    async init() {
+      this.trackCurrentPage();
+      this.loadRecentPages();
+      await this.loadUserRole();
+      this.generateSuggestions();
+      this.setupVisibilityLogic();
+    }
+    
+    trackCurrentPage() {
+      const currentPath = window.location.pathname;
+      const currentTitle = document.title.replace(' | AI Product Development Wiki', '');
+      
+      // Don't track certain pages
+      if (this.shouldIgnorePage(currentPath)) return;
+      
+      const pageData = {
+        path: currentPath,
+        title: currentTitle,
+        timestamp: Date.now(),
+        visits: 1
+      };
+      
+      let recentPages = this.getRecentPages();
+      
+      // Check if page already exists
+      const existingIndex = recentPages.findIndex(page => page.path === currentPath);
+      if (existingIndex > -1) {
+        // Update existing page
+        recentPages[existingIndex].timestamp = Date.now();
+        recentPages[existingIndex].visits += 1;
+        // Move to front
+        const updated = recentPages.splice(existingIndex, 1)[0];
+        recentPages.unshift(updated);
+      } else {
+        // Add new page
+        recentPages.unshift(pageData);
+      }
+      
+      // Keep only maxRecentItems
+      recentPages = recentPages.slice(0, this.maxRecentItems);
+      
+      localStorage.setItem(this.recentKey, JSON.stringify(recentPages));
+    }
+    
+    shouldIgnorePage(path) {
+      const ignorePaths = ['/sign-in', '/sign-up', '/premium-sign-in', '/premium-sign-up'];
+      return ignorePaths.includes(path) || path === '/';
+    }
+    
+    getRecentPages() {
+      try {
+        return JSON.parse(localStorage.getItem(this.recentKey) || '[]');
+      } catch {
+        return [];
+      }
+    }
+    
+    loadRecentPages() {
+      const recentPages = this.getRecentPages();
+      
+      if (recentPages.length === 0) return;
+      
+      this.recentLinks.innerHTML = '';
+      
+      recentPages.forEach((page, index) => {
+        const li = document.createElement('li');
+        li.className = 'smart-nav-item';
+        li.style.animationDelay = `${index * 0.1}s`;
+        li.innerHTML = `
+          <a href="${page.path}" class="smart-nav-link">
+            <div class="nav-link-content">
+              <span class="nav-link-title">${page.title}</span>
+              <span class="nav-link-meta">${this.formatTime(page.timestamp)} • ${page.visits} ${page.visits === 1 ? 'visit' : 'visits'}</span>
+            </div>
+            <div class="nav-link-arrow">→</div>
+          </a>
+        `;
+        this.recentLinks.appendChild(li);
+      });
+      
+      this.recentSection.style.display = 'block';
+      setTimeout(() => {
+        this.recentSection.classList.add('animate-fade-in-up');
+      }, 100);
+    }
+    
+    async loadUserRole() {
+      try {
+        const response = await fetch('/api/auth/user');
+        if (response.ok) {
+          const userData = await response.json();
+          this.userRole = userData.role || 'public';
+        } else {
+          this.userRole = 'public';
+        }
+      } catch {
+        this.userRole = 'public';
+      }
+    }
+    
+    generateSuggestions() {
+      const suggestions = this.getRoleSuggestions(this.userRole);
+      
+      if (suggestions.length === 0) return;
+      
+      this.suggestionLinks.innerHTML = '';
+      
+      suggestions.forEach((suggestion, index) => {
+        const li = document.createElement('li');
+        li.className = 'smart-nav-item';
+        li.style.animationDelay = `${(index + 2) * 0.1}s`;
+        li.innerHTML = `
+          <a href="${suggestion.path}" class="smart-nav-link">
+            <div class="nav-link-content">
+              <span class="nav-link-title">${suggestion.title}</span>
+              <span class="nav-link-meta">${suggestion.description}</span>
+            </div>
+            <div class="nav-link-arrow">→</div>
+          </a>
+        `;
+        this.suggestionLinks.appendChild(li);
+      });
+      
+      this.suggestionsSection.style.display = 'block';
+      setTimeout(() => {
+        this.suggestionsSection.classList.add('animate-fade-in-up');
+      }, 300);
+    }
+    
+    getRoleSuggestions(role) {
+      const suggestions = {
+        'management': [
+          { path: '/Circle_Management/management_tasks', title: 'Management Tasks', description: 'Review team progress and assignments' },
+          { path: '/Circle_Management/member_table', title: 'Member Directory', description: 'Manage community members' }
+        ],
+        'working_group': [
+          { path: '/challenges/Challenges_list', title: 'Challenge Library', description: 'Your primary workspace' },
+          { path: '/Events/Events_overview', title: 'Events', description: 'Upcoming AI community events' }
+        ],
+        'public': [
+          { path: '/challenges/overview', title: 'Challenges Overview', description: 'Start your AI journey' },
+          { path: '/contributing', title: 'Contributing Guide', description: 'Learn how to contribute' }
+        ]
+      };
+      
+      return suggestions[role] || suggestions.public;
+    }
+    
+    formatTime(timestamp) {
+      const now = Date.now();
+      const diff = now - timestamp;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      
+      if (minutes < 1) return 'Just now';
+      if (minutes < 60) return `${minutes}m ago`;
+      if (hours < 24) return `${hours}h ago`;
+      return `${days}d ago`;
+    }
+    
+    setupVisibilityLogic() {
+      // Show smart navigation only when there's content and user is engaged
+      const hasRecentContent = this.getRecentPages().length > 0;
+      const isEngaged = performance.navigation.type === 0; // Direct navigation
+      
+      if (hasRecentContent || isEngaged) {
+        setTimeout(() => {
+          this.smartNavEl.classList.add('smart-nav-visible');
+        }, 1000);
+      }
+    }
+  }
+  
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    new SmartNavigationManager();
+  });
+</script>
+
+<style>
+  .smart-navigation {
+    margin-top: var(--premium-space-lg);
+    padding: var(--premium-space-md);
+    background: var(--premium-glass);
+    border-radius: var(--premium-radius-lg);
+    border: 1px solid var(--premium-glass-border);
+    backdrop-filter: blur(20px);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all var(--premium-transition-slow);
+  }
+  
+  .smart-nav-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .nav-section {
+    margin-bottom: var(--premium-space-lg);
+  }
+  
+  .nav-section:last-child {
+    margin-bottom: 0;
+  }
+  
+  .nav-section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--premium-space-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--premium-gray-700);
+    margin: 0 0 var(--premium-space-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .recent-links,
+  .suggestion-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--premium-space-xs);
+  }
+  
+  .smart-nav-item {
+    opacity: 0;
+    transform: translateX(-10px);
+    animation: smartNavItemIn 0.3s ease-out forwards;
+  }
+  
+  @keyframes smartNavItemIn {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  .smart-nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--premium-space-sm) var(--premium-space-md);
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--premium-radius-md);
+    transition: all var(--premium-transition-normal);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .smart-nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 102, 255, 0.1), transparent);
+    transition: all var(--premium-transition-slow);
+  }
+  
+  .smart-nav-link:hover::before {
+    left: 100%;
+  }
+  
+  .smart-nav-link:hover {
+    background: var(--premium-glass);
+    transform: translateX(4px);
+    box-shadow: var(--premium-shadow-sm);
+  }
+  
+  .nav-link-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .nav-link-title {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--premium-gray-800);
+    margin-bottom: 2px;
+  }
+  
+  .nav-link-meta {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--premium-gray-500);
+    opacity: 0.8;
+  }
+  
+  .nav-link-arrow {
+    font-size: 0.875rem;
+    color: var(--premium-gray-400);
+    transition: all var(--premium-transition-normal);
+    margin-left: var(--premium-space-sm);
+  }
+  
+  .smart-nav-link:hover .nav-link-arrow {
+    color: var(--premium-primary);
+    transform: translateX(2px);
+  }
+  
+  /* Dark mode */
+  [data-theme="dark"] .nav-section-title {
+    color: var(--premium-gray-300);
+  }
+  
+  [data-theme="dark"] .nav-link-title {
+    color: var(--premium-gray-200);
+  }
+  
+  [data-theme="dark"] .nav-link-meta {
+    color: var(--premium-gray-400);
+  }
+  
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .smart-navigation {
+      margin-top: var(--premium-space-md);
+      padding: var(--premium-space-sm);
+    }
+    
+    .nav-link-title {
+      font-size: 0.8rem;
+    }
+    
+    .nav-link-meta {
+      font-size: 0.7rem;
+    }
+  }
+</style>

@@ -1,0 +1,305 @@
+---
+// Smart Landing Router - Directs users to optimal landing pages based on role
+---
+
+<script>
+  class SmartLandingRouter {
+    constructor() {
+      this.currentPath = window.location.pathname;
+      this.userRole = null;
+      this.isFirstVisit = this.checkFirstVisit();
+      
+      // Only activate on homepage or wiki root
+      if (this.shouldActivateRouter()) {
+        this.init();
+      }
+    }
+    
+    shouldActivateRouter() {
+      return this.currentPath === '/' || this.currentPath === '/wiki/' || 
+             this.currentPath === '/index.html';
+    }
+    
+    async init() {
+      await this.loadUserRole();
+      
+      // Small delay to allow page to load and show transition
+      setTimeout(() => {
+        this.routeToOptimalLanding();
+      }, 1500);
+    }
+    
+    async loadUserRole() {
+      try {
+        const response = await fetch('/api/auth/user');
+        if (response.ok) {
+          const userData = await response.json();
+          this.userRole = userData.role || 'public';
+          this.userEmail = userData.email;
+        } else {
+          this.userRole = 'public';
+        }
+      } catch {
+        this.userRole = 'public';
+      }
+    }
+    
+    checkFirstVisit() {
+      const visitCount = localStorage.getItem('starlight-visit-count') || '0';
+      const count = parseInt(visitCount);
+      localStorage.setItem('starlight-visit-count', (count + 1).toString());
+      return count === 0;
+    }
+    
+    routeToOptimalLanding() {
+      // Skip routing if user is already engaged with dashboard
+      if (this.hasUserInteracted()) return;
+      
+      const landingPages = {
+        'management': '/Circle_Management/management_tasks',
+        'working_group': '/challenges/Challenges_list', // Challenge library as primary landing
+        'public': null // Stay on homepage
+      };
+      
+      const targetLanding = landingPages[this.userRole];
+      
+      // For working group users, redirect to challenge library
+      if (targetLanding && (this.userRole === 'working_group' || this.userRole === 'management')) {
+        this.showRedirectNotification(targetLanding);
+        setTimeout(() => {
+          this.performSmartRedirect(targetLanding);
+        }, 2000);
+      }
+    }
+    
+    hasUserInteracted() {
+      // Check if user has scrolled or clicked anything
+      return window.scrollY > 100 || 
+             performance.now() > 10000 || // More than 10 seconds on page
+             localStorage.getItem('starlight-user-interacted') === 'true';
+    }
+    
+    showRedirectNotification(targetUrl) {
+      const notification = document.createElement('div');
+      notification.className = 'smart-redirect-notification';
+      notification.innerHTML = `
+        <div class="redirect-content">
+          <div class="redirect-icon">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/>
+            </svg>
+          </div>
+          <div class="redirect-text">
+            <div class="redirect-title">Taking you to your workspace...</div>
+            <div class="redirect-subtitle">${this.getRedirectMessage(targetUrl)}</div>
+          </div>
+          <div class="redirect-progress">
+            <div class="progress-bar"></div>
+          </div>
+          <button class="redirect-cancel" onclick="this.parentElement.parentElement.remove()">
+            Stay Here
+          </button>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Animate in
+      setTimeout(() => {
+        notification.classList.add('notification-visible');
+      }, 100);
+      
+      // Track that user has been notified
+      localStorage.setItem('starlight-user-interacted', 'true');
+    }
+    
+    getRedirectMessage(url) {
+      const messages = {
+        '/challenges/Challenges_list': 'Your challenge library awaits!',
+        '/Circle_Management/management_tasks': 'Management dashboard ready.'
+      };
+      return messages[url] || 'Optimizing your experience...';
+    }
+    
+    performSmartRedirect(targetUrl) {
+      // Add page transition effect
+      document.body.classList.add('page-transitioning');
+      
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 500);
+    }
+  }
+  
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    // Only initialize if user hasn't opted out
+    if (localStorage.getItem('starlight-auto-redirect') !== 'disabled') {
+      new SmartLandingRouter();
+    }
+  });
+  
+  // Track user interactions to prevent unwanted redirects
+  ['scroll', 'click', 'keydown'].forEach(event => {
+    document.addEventListener(event, () => {
+      localStorage.setItem('starlight-user-interacted', 'true');
+    }, { once: true });
+  });
+</script>
+
+<style>
+  .smart-redirect-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    transform: translateX(400px);
+    transition: all var(--premium-transition-slow);
+    pointer-events: none;
+  }
+  
+  .notification-visible {
+    transform: translateX(0);
+    pointer-events: all;
+  }
+  
+  .redirect-content {
+    background: white;
+    border-radius: var(--premium-radius-xl);
+    box-shadow: var(--premium-shadow-xl);
+    border: 1px solid var(--premium-glass-border);
+    padding: var(--premium-space-lg);
+    min-width: 320px;
+    max-width: 400px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .redirect-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--premium-gradient-primary);
+  }
+  
+  .redirect-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--premium-gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-bottom: var(--premium-space-md);
+    animation: pulse 2s infinite;
+  }
+  
+  .redirect-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--premium-gray-900);
+    margin-bottom: var(--premium-space-xs);
+  }
+  
+  .redirect-subtitle {
+    font-size: 0.875rem;
+    color: var(--premium-gray-600);
+    margin-bottom: var(--premium-space-md);
+  }
+  
+  .redirect-progress {
+    height: 4px;
+    background: var(--premium-gray-200);
+    border-radius: 2px;
+    margin-bottom: var(--premium-space-md);
+    overflow: hidden;
+  }
+  
+  .progress-bar {
+    height: 100%;
+    background: var(--premium-gradient-primary);
+    border-radius: 2px;
+    width: 0;
+    animation: progressFill 2s ease-out forwards;
+  }
+  
+  .redirect-cancel {
+    background: var(--premium-gray-100);
+    border: 1px solid var(--premium-gray-300);
+    border-radius: var(--premium-radius-md);
+    padding: var(--premium-space-xs) var(--premium-space-md);
+    font-size: 0.8rem;
+    color: var(--premium-gray-700);
+    cursor: pointer;
+    transition: all var(--premium-transition-normal);
+  }
+  
+  .redirect-cancel:hover {
+    background: var(--premium-gray-200);
+    border-color: var(--premium-gray-400);
+  }
+  
+  @keyframes progressFill {
+    0% { width: 0; }
+    100% { width: 100%; }
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+  }
+  
+  /* Page transition effect */
+  .page-transitioning {
+    opacity: 0.8;
+    transition: opacity var(--premium-transition-slow);
+  }
+  
+  /* Dark mode */
+  [data-theme="dark"] .redirect-content {
+    background: var(--premium-gray-800);
+    border-color: var(--premium-gray-700);
+  }
+  
+  [data-theme="dark"] .redirect-title {
+    color: var(--premium-gray-100);
+  }
+  
+  [data-theme="dark"] .redirect-subtitle {
+    color: var(--premium-gray-400);
+  }
+  
+  [data-theme="dark"] .redirect-cancel {
+    background: var(--premium-gray-700);
+    border-color: var(--premium-gray-600);
+    color: var(--premium-gray-300);
+  }
+  
+  [data-theme="dark"] .redirect-cancel:hover {
+    background: var(--premium-gray-600);
+    border-color: var(--premium-gray-500);
+  }
+  
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .smart-redirect-notification {
+      top: 10px;
+      right: 10px;
+      left: 10px;
+      transform: translateY(-400px);
+    }
+    
+    .notification-visible {
+      transform: translateY(0);
+    }
+    
+    .redirect-content {
+      min-width: auto;
+      padding: var(--premium-space-md);
+    }
+  }
+</style>

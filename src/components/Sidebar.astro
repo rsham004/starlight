@@ -1,13 +1,17 @@
 ---
 import type { Props } from '@astrojs/starlight/props';
 import Default from '@astrojs/starlight/components/Sidebar.astro';
+import PremiumSidebar from './PremiumSidebar.astro';
 ---
 
 <!-- Include the default sidebar first -->
 <Default {...Astro.props} />
 
-<!-- Add our custom dynamic sidebar content -->
-<div id="dynamic-sidebar-overlay">
+<!-- Add our premium dynamic sidebar -->
+<PremiumSidebar />
+
+<!-- Legacy dynamic sidebar content for backwards compatibility -->
+<div id="dynamic-sidebar-overlay" style="display: none;">
   <div class="sidebar-section">
     <h3>Welcome</h3>
     <ul>

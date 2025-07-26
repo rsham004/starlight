@@ -19,6 +19,9 @@ export const onRequest = clerkMiddleware(async (auth, context, next) => {
   const { pathname } = new URL(context.request.url);
   const method = context.request.method;
   
+  // Always make auth available for all routes
+  const authResult = await auth();
+  
   // Public read access to /challenges (no auth required)
   if (pathname.includes('/challenges') && method === 'GET') {
     return next();
@@ -26,8 +29,6 @@ export const onRequest = clerkMiddleware(async (auth, context, next) => {
   
   // Check if it's an edit operation or restricted content
   if (isEditRoute(context.request) || isCircleManagementRoute(context.request)) {
-    const authResult = await auth();
-    
     if (!authResult?.userId) {
       // Not logged in - redirect to sign-in for edit operations
       return new Response(null, {

@@ -1,0 +1,24 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="managementAvatarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#dc2626;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#b91c1c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="20" cy="20" r="19" fill="url(#managementAvatarGradient)" stroke="white" stroke-width="2"/>
+  
+  <!-- User icon -->
+  <circle cx="20" cy="15" r="5" fill="white" opacity="0.95"/>
+  <path d="M10 32 Q10 26 15 24 Q17.5 23 20 23 Q22.5 23 25 24 Q30 26 30 32" fill="white" opacity="0.95"/>
+  
+  <!-- Management indicator (crown) -->
+  <g transform="translate(26, 24)">
+    <circle cx="4" cy="6" r="6" fill="#f59e0b"/>
+    <path d="M1 6 L2 4 L3 5 L4 3 L5 5 L6 4 L7 6 L7 8 L1 8 Z" fill="#f59e0b"/>
+    <circle cx="2.5" cy="5" r="0.5" fill="white"/>
+    <circle cx="4" cy="4" r="0.5" fill="white"/>
+    <circle cx="5.5" cy="5" r="0.5" fill="white"/>
+  </g>
+</svg>

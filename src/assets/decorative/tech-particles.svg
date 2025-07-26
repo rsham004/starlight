@@ -1,0 +1,103 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="particleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0066ff;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#6366f1;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.4" />
+    </linearGradient>
+    
+    <filter id="particleGlow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Binary particles -->
+  <g opacity="0.6">
+    <text x="100" y="100" fill="#0066ff" font-family="monospace" font-size="12" opacity="0.4">01001</text>
+    <text x="300" y="150" fill="#6366f1" font-family="monospace" font-size="10" opacity="0.3">11010</text>
+    <text x="500" y="200" fill="#8b5cf6" font-family="monospace" font-size="14" opacity="0.5">00110</text>
+    <text x="200" y="300" fill="#0066ff" font-family="monospace" font-size="11" opacity="0.4">10101</text>
+    <text x="600" y="350" fill="#a855f7" font-family="monospace" font-size="13" opacity="0.3">01110</text>
+    <text x="150" y="450" fill="#6366f1" font-family="monospace" font-size="9" opacity="0.4">11001</text>
+    <text x="450" y="500" fill="#8b5cf6" font-family="monospace" font-size="12" opacity="0.3">00101</text>
+  </g>
+  
+  <!-- Geometric particles -->
+  <g opacity="0.7">
+    <!-- Triangles -->
+    <polygon points="150,50 160,70 140,70" fill="#0066ff" opacity="0.4" filter="url(#particleGlow)">
+      <animateTransform attributeName="transform" type="rotate" values="0 150 60;360 150 60" dur="8s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <polygon points="400,100 410,120 390,120" fill="#6366f1" opacity="0.3" filter="url(#particleGlow)">
+      <animateTransform attributeName="transform" type="rotate" values="0 400 110;-360 400 110" dur="12s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <!-- Squares -->
+    <rect x="250" y="250" width="8" height="8" fill="#8b5cf6" opacity="0.5" filter="url(#particleGlow)">
+      <animateTransform attributeName="transform" type="rotate" values="0 254 254;360 254 254" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    
+    <rect x="550" y="300" width="6" height="6" fill="#a855f7" opacity="0.4" filter="url(#particleGlow)">
+      <animateTransform attributeName="transform" type="rotate" values="0 553 303;-360 553 303" dur="10s" repeatCount="indefinite"/>
+    </rect>
+    
+    <!-- Hexagons -->
+    <polygon points="350,400 360,407 360,421 350,428 340,421 340,407" fill="#0066ff" opacity="0.6" filter="url(#particleGlow)">
+      <animateTransform attributeName="transform" type="rotate" values="0 350 414;360 350 414" dur="7s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <polygon points="650,150 658,156 658,168 650,174 642,168 642,156" fill="#6366f1" opacity="0.3" filter="url(#particleGlow)">
+      <animateTransform attributeName="transform" type="rotate" values="0 650 162;-360 650 162" dur="9s" repeatCount="indefinite"/>
+    </polygon>
+  </g>
+  
+  <!-- Floating dots with trails -->
+  <g>
+    <!-- Large dots -->
+    <circle cx="80" cy="200" r="3" fill="#0066ff" opacity="0.7" filter="url(#particleGlow)">
+      <animate attributeName="cy" values="200;180;200" dur="5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0.3;0.7" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="720" cy="400" r="2.5" fill="#6366f1" opacity="0.6" filter="url(#particleGlow)">
+      <animate attributeName="cx" values="720;700;720" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0.2;0.6" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Medium dots -->
+    <circle cx="300" cy="50" r="2" fill="#8b5cf6" opacity="0.5" filter="url(#particleGlow)">
+      <animate attributeName="cy" values="50;30;50" dur="7s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.5;0.1;0.5" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="650" cy="500" r="2" fill="#a855f7" opacity="0.4" filter="url(#particleGlow)">
+      <animate attributeName="cx" values="650;670;650" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="500;480;500" dur="5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Small dots -->
+    <circle cx="500" cy="80" r="1.5" fill="#c084fc" opacity="0.3" filter="url(#particleGlow)">
+      <animate attributeName="cy" values="80;60;80" dur="9s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.1;0.3" dur="5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="150" cy="550" r="1.5" fill="#0066ff" opacity="0.3" filter="url(#particleGlow)">
+      <animate attributeName="cx" values="150;170;150" dur="10s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.1;0.3" dur="6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Connection lines between particles -->
+  <g opacity="0.2">
+    <line x1="150" y1="60" x2="300" y2="50" stroke="url(#particleGradient)" stroke-width="1"/>
+    <line x1="254" y1="254" x2="350" y2="414" stroke="url(#particleGradient)" stroke-width="1"/>
+    <line x1="400" y1="110" x2="650" y2="162" stroke="url(#particleGradient)" stroke-width="1"/>
+    <line x1="80" y1="200" x2="150" y2="550" stroke="url(#particleGradient)" stroke-width="1"/>
+  </g>
+</svg>

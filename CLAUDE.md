@@ -1,11 +1,14 @@
 # Claude Agent Instructions for Starlight Wiki
 
 ## System Architecture
-This is a Starlight documentation site that syncs content from a private GitHub wiki repository using API-based operations.
+This is a Starlight documentation site that syncs content from a private GitHub wiki repository using API-based operations. Clerk auth. No other technology to be utilised unless required by this stack.
+
+## Do not bypass instructions
 
 ## Repository Management Rules
 
 ### ❌ NEVER DO:
+- **Use only agreed technology starlight and Clerk no other technology** using `git clone`
 - **DO NOT clone repositories locally** using `git clone`
 - **DO NOT create temporary directories** like `.git-content-cache`, `.wiki-temp`, `.wiki-sync`
 - **DO NOT use execSync with git commands** for repository operations
@@ -16,6 +19,7 @@ This is a Starlight documentation site that syncs content from a private GitHub 
 - **Use GitContentManager class** which implements API-based operations
 - **Keep operations stateless** - no local repository state
 - **Use WIKI_CONTENT_ACCESS_TOKEN** for authentication
+- **Create git issues and update them for all problems and tasks** using `gh command`
 
 ## Content Management Flow
 
@@ -58,14 +62,17 @@ src/
 ```
 
 ## Testing Guidelines
+- Use TDD
+- Always test via front end
+- Testnavigation user experience and aestheticss to be expensive like a ad agency
 - Test API operations without creating repository clones
 - Use direct GitHub API calls for verification
-- Simulate authenticated users with proper Clerk context
+- Do not Simulate authenticated users but use real API calls with proper Clerk context and ensure users are created in clerk always verify and subsequently delte test data
 - Verify content appears in both repository and local sync
 
 ## Performance Notes
 - API operations are faster than git clones
-- No cleanup of temporary directories needed
+- cleanup of temporary directories and test artefacts needed
 - Stateless operations prevent sync conflicts
 - Direct repository operations via GitHub API
 

@@ -1,0 +1,93 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0066ff;stop-opacity:0.6" />
+      <stop offset="30%" style="stop-color:#6366f1;stop-opacity:0.4" />
+      <stop offset="70%" style="stop-color:#8b5cf6;stop-opacity:0.4" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:0.6" />
+    </linearGradient>
+    <filter id="blur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1"/>
+    </filter>
+  </defs>
+  
+  <!-- Main flow paths -->
+  <g opacity="0.8">
+    <!-- Primary flow -->
+    <path d="M0,150 Q300,100 600,150 Q900,200 1200,150" 
+          fill="none" 
+          stroke="url(#flowGradient)" 
+          stroke-width="3" 
+          filter="url(#blur)"/>
+    
+    <!-- Secondary flows -->
+    <path d="M0,120 Q300,80 600,120 Q900,160 1200,120" 
+          fill="none" 
+          stroke="url(#flowGradient)" 
+          stroke-width="2" 
+          opacity="0.6"/>
+    
+    <path d="M0,180 Q300,140 600,180 Q900,220 1200,180" 
+          fill="none" 
+          stroke="url(#flowGradient)" 
+          stroke-width="2" 
+          opacity="0.6"/>
+    
+    <!-- Tertiary flows -->
+    <path d="M0,100 Q300,60 600,100 Q900,140 1200,100" 
+          fill="none" 
+          stroke="url(#flowGradient)" 
+          stroke-width="1" 
+          opacity="0.4"/>
+    
+    <path d="M0,200 Q300,160 600,200 Q900,240 1200,200" 
+          fill="none" 
+          stroke="url(#flowGradient)" 
+          stroke-width="1" 
+          opacity="0.4"/>
+  </g>
+  
+  <!-- Data particles -->
+  <g>
+    <!-- Fast particles -->
+    <circle r="3" fill="#0066ff" opacity="0.8">
+      <animateMotion dur="6s" repeatCount="indefinite">
+        <path d="M0,150 Q300,100 600,150 Q900,200 1200,150"/>
+      </animateMotion>
+    </circle>
+    
+    <circle r="2" fill="#6366f1" opacity="0.7">
+      <animateMotion dur="8s" repeatCount="indefinite" begin="2s">
+        <path d="M0,120 Q300,80 600,120 Q900,160 1200,120"/>
+      </animateMotion>
+    </circle>
+    
+    <circle r="2" fill="#8b5cf6" opacity="0.6">
+      <animateMotion dur="10s" repeatCount="indefinite" begin="4s">
+        <path d="M0,180 Q300,140 600,180 Q900,220 1200,180"/>
+      </animateMotion>
+    </circle>
+    
+    <!-- Slow particles -->
+    <circle r="1.5" fill="#a855f7" opacity="0.5">
+      <animateMotion dur="12s" repeatCount="indefinite" begin="1s">
+        <path d="M0,100 Q300,60 600,100 Q900,140 1200,100"/>
+      </animateMotion>
+    </circle>
+    
+    <circle r="1.5" fill="#c084fc" opacity="0.4">
+      <animateMotion dur="14s" repeatCount="indefinite" begin="3s">
+        <path d="M0,200 Q300,160 600,200 Q900,240 1200,200"/>
+      </animateMotion>
+    </circle>
+  </g>
+  
+  <!-- Connection nodes -->
+  <g opacity="0.7">
+    <circle cx="200" cy="135" r="4" fill="#0066ff" opacity="0.6"/>
+    <circle cx="400" cy="125" r="4" fill="#6366f1" opacity="0.6"/>
+    <circle cx="600" cy="150" r="5" fill="#8b5cf6" opacity="0.8"/>
+    <circle cx="800" cy="175" r="4" fill="#a855f7" opacity="0.6"/>
+    <circle cx="1000" cy="140" r="4" fill="#c084fc" opacity="0.6"/>
+  </g>
+</svg>
