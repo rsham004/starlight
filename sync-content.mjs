@@ -3,10 +3,10 @@ import { existsSync, rmSync, mkdirSync, readFileSync, writeFileSync, readdirSync
 import { join, dirname } from 'path';
 import path from 'path';
 
-// Use authenticated URL if GITHUB_TOKEN is available
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const REPO_URL = GITHUB_TOKEN 
-  ? `https://x-access-token:${GITHUB_TOKEN}@github.com/AI-Product-Development/wiki.git`
+// Use WIKI_CONTENT_ACCESS_TOKEN for wiki access
+const WIKI_TOKEN = process.env.WIKI_CONTENT_ACCESS_TOKEN || process.env.GITHUB_TOKEN;
+const REPO_URL = WIKI_TOKEN 
+  ? `https://x-access-token:${WIKI_TOKEN}@github.com/AI-Product-Development/wiki.git`
   : 'https://github.com/AI-Product-Development/wiki.git';
 const TEMP_DIR = './.wiki-sync';
 const CONTENT_DIR = './src/content/docs';

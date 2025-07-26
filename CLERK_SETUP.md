@@ -87,55 +87,10 @@ Following Clerk best practices, roles are stored in `public_metadata`:
 
 ### Member Email List
 
-The following emails have been configured for working group access:
-- abirathamir@gmail.com
-- alex.coaton@gmail.com
-- allison9y@gmail.com
-- amirtha05032000@gmail.com
-- arorarajat0912@gmail.com
-- ashok@askaconsulting.com
-- bharathssa16@gmail.com
-- cathyofnz@gmail.com
-- cgbarlow@gmail.com
-- chainat@gmail.com
-- clareivers@gmail.com
-- d1643146364@gmail.com
-- dandyhello@gmail.com
-- daniel.pruessner@gmail.com
-- dave.braendler@productfoundry.ai
-- dilip.ladhani@gmail.com
-- easybishal@gmail.com
-- evanlee123@utexas.edu
-- glenn.ramsey.nz@gmail.com
-- gvenkat7@outlook.com
-- kylejaycampbell@gmail.com
-- mail@dkkim.com
-- mark.egan@forgant.com
-- martin@return2health.net
-- meetup@complexity.com.au
-- mick.hobart@gmail.com
-- mohd.azeemuddin@gmail.com
-- nedhorvath@utexas.edu
-- nexus1234@gmail.com
-- nigamayush6@gmail.com
-- niraj411k@gmail.com
-- nirankarjaiswar@gmail.com
-- oliviadong2918@gmail.com
-- onats.ong@gmail.com
-- pappes@gmail.com
-- pranavgoyal.work@gmail.com
-- praveenchukkala07@gmail.com
-- ravi.shamihoke@productfoundry.ai
-- schnell18@gmail.com
-- shahriarmdgolam@gmail.com
-- shahsimoni891@gmail.com
-- sharat@intuneai.com.au
-- sillva@gmail.com
-- susanwangds@gmail.com
-- tomo@tomoLennox.com
-- varad@neuralhiive.ai
-- vignesh.nadarajah@gmail.com
-- yakernz@gmail.com
+**SECURITY NOTE: EMAIL LIST REMOVED**
+- Working group member emails (46 total) have been moved to secure storage
+- Contact admin for access to member list
+- Individual role assignment handled through Clerk dashboard
 
 ## Access Levels
 
@@ -167,13 +122,13 @@ Clerk doesn't use pre-set passwords. Instead, users create their own secure acco
 1. **Option A - Ravi Creates Account:**
    - Ravi visits your site at `http://localhost:4321`
    - Clicks "Sign Up"
-   - Uses email: `ravi.shamihoke@productfoundry.ai`
+   - Uses admin email address
    - Creates his own secure password
    - Verifies email
 
 2. **Option B - Admin Invitation (Recommended):**
    - In Clerk Dashboard → Users → "Invite Users"
-   - Enter: `ravi.shamihoke@productfoundry.ai`
+   - Enter admin email address
    - Ravi receives email invitation
    - Sets up his own password during first login
 

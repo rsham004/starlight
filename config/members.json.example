@@ -1,0 +1,8 @@
+{
+  "workingGroup": [
+    { "name": "Example Member", "email": "example@domain.com" }
+  ],
+  "management": [
+    { "name": "Admin User", "email": "admin@domain.com", "role": "admin" }
+  ]
+}

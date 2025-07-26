@@ -15,7 +15,9 @@ pnpm-debug.log*
 
 # environment variables
 .env
+.env.local
 .env.production
+.env.development
 
 # macOS-specific files
 .DS_Store
@@ -38,3 +40,18 @@ dist/
 # OS files
 Thumbs.db
 .DS_Store
+
+# test artifacts
+*test*.md
+**/*test*.astro
+**/test-*.ts
+**/Test_Area/
+cleanup-test-artifacts.js
+
+# sensitive data - email addresses and member information
+config/members.json
+src/config/members.json
+**/members.json
+**/*members*.json
+**/*email*.json
+**/*contacts*.json
